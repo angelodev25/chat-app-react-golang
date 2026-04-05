@@ -1,0 +1,121 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+:root {
+  color: rgb(182, 193, 196);
+  background-color: rgb(7, 9, 11);
+  font-family:'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+  --radius: 0.625rem;
+  --background: rgb(7, 9, 11);
+  --foreground: rgb(182, 193, 196);
+  --card: rgb(7, 9, 11);
+  --card-foreground: rgb(182, 193, 196);
+  --popover: rgb(7, 9, 11);
+  --popover-foreground: rgb(182, 193, 196);
+  --primary: rgb(182, 193, 196);
+  --primary-foreground: rgb(7, 9, 11);
+  --secondary: rgb(30, 41, 59);
+  --secondary-foreground: rgb(182, 193, 196);
+  --muted: rgb(30, 41, 59);
+  --muted-foreground: rgb(148, 163, 184);
+  --accent: rgb(30, 41, 59);
+  --accent-foreground: rgb(182, 193, 196);
+  --destructive: rgb(239, 68, 68);
+  --border: rgb(30, 41, 59);
+  --input: rgb(30, 41, 59);
+  --ring: rgb(148, 163, 184);
+  --chart-1: rgb(239, 68, 68);
+  --chart-2: rgb(34, 197, 94);
+  --chart-3: rgb(59, 130, 246);
+  --chart-4: rgb(234, 179, 8);
+  --chart-5: rgb(168, 85, 247);
+  --sidebar: rgb(7, 9, 11);
+  --sidebar-foreground: rgb(182, 193, 196);
+  --sidebar-primary: rgb(239, 68, 68);
+  --sidebar-primary-foreground: rgb(7, 9, 11);
+  --sidebar-accent: rgb(30, 41, 59);
+  --sidebar-accent-foreground: rgb(182, 193, 196);
+  --sidebar-border: rgb(30, 41, 59);
+  --sidebar-ring: rgb(148, 163, 184);
+}
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+  --radius-4xl: calc(var(--radius) + 16px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* Para Webkit (Chrome, Safari, Edge) */
+.custom-scroll::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+.custom-scroll::-webkit-scrollbar-track {
+    background: #1f2937; /* Color del fondo de la barra */
+    border-radius: 10px;
+}
+
+.custom-scroll::-webkit-scrollbar-thumb {
+    background: #4b5563; /* Color del thumb (la parte que se mueve) */
+    border-radius: 10px;
+}
+
+.custom-scroll::-webkit-scrollbar-thumb:hover {
+    background: #6b7280; /* Color al hacer hover */
+}
+
+.custom-scroll::-webkit-scrollbar-corner {
+    background: #1f2937; /* Color de la esquina cuando hay scroll horizontal y vertical */
+}
+
+/* Para Firefox */
+.custom-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: #4b5563 #1f2937;
+}

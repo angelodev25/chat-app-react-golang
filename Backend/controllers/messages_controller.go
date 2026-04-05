@@ -1,0 +1,76 @@
+package controllers
+
+import (
+	"log"
+
+	"github.com/angedev25/chat-backend/database"
+	"github.com/angedev25/chat-backend/models"
+	"github.com/angedev25/chat-backend/utils"
+	"github.com/gofiber/fiber/v2"
+)
+
+func LoadChatMessages(c *fiber.Ctx) error {
+	chatId := c.Params("chatId")
+	userId := c.Locals("userId").(string)
+
+	userDir, _, err := utils.InitUserDir(userId)
+	if err != nil {
+		log.Println("Error al obtener directorio del usuario: ", err)
+		return c.Status(500).JSON(fiber.Map{"error": "Error del servidor"})
+	}
+
+	userDB, err := database.InitMessagesDB(userDir)
+	if err != nil {
+		log.Println("Error al obtener la base de datos de mensajes: ", err)
+		return c.Status(500).JSON(fiber.Map{"error": "Error del servidor"})
+	}
+	defer userDB.Close()
+
+	query := `SELECT * FROM messages WHERE chat_id = $1`
+	rows, err := userDB.Query(query, chatId)
+	if err != nil {
+		log.Println("Error al extraer mensajes: ", err)
+		return c.Status(401).JSON(fiber.Map{"error": "Error al extraer los mensajes"})
+	}
+	var messages []models.Message
+	for rows.Next() {
+		var message models.Message
+		err := rows.Scan(&message.ID, &message.ChatID, &message.SenderID, &message.Content, &message.Timestamp, &message.Readed)
+		if err != nil {
+			log.Println("En el for messages: ", err)
+			return c.Status(500).JSON(fiber.Map{"error": "Error al cargar los mensajes"})
+		}
+		messages = append(messages, message)
+	}
+
+	return c.Status(200).JSON(fiber.Map{"messages": messages})
+}
+
+func DeleteMessage(c *fiber.Ctx) error {
+	chatId := c.Params("chatId")
+	messageId := c.Params("messageId")
+
+	userId := c.Locals("userId").(string)
+	userDir, _, err := utils.InitUserDir(userId)
+	if err != nil {
+		log.Println("Error al obtener directorio del usuario: ", err)
+		return c.Status(500).JSON(fiber.Map{"error": "Error del servidor"})
+	}
+
+	userDB, err := database.InitMessagesDB(userDir)
+	if err != nil {
+		log.Println("Error al obtener la base de datos de mensajes: ", err)
+		return c.Status(500).JSON(fiber.Map{"error": "Error del servidor"})
+	}
+	defer userDB.Close()
+
+	query := `DELETE FROM messages WHERE id = $1 AND chat_id = $2`
+	_, err = userDB.Exec(query, messageId, chatId)
+	if err != nil {
+		log.Println("Error al eliminar mensaje: ", err)
+		return c.Status(500).JSON(fiber.Map{"error": "Error al eliminar el mensaje"})
+	}
+
+	return c.Status(200).JSON(fiber.Map{"id": messageId})
+
+}
