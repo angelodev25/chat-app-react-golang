@@ -10,6 +10,15 @@ Las funcionalidades integradas hasta ahora son: Creación y eliminación de chat
 
 Los mensajes son almacenado en una base de datos SQlite en un directorio específico para cada usuario, al igual su foto de perfil.
 
+## Capturas de pantalla
+
+![imagen 1](./images/Screenshots/Captura%20de%20pantalla_2026-04-12_17-19-54.png)
+![imagen 2](./images/Screenshots/Captura%20de%20pantalla_2026-04-12_17-20-23.png)
+![imagen 3](./images/Screenshots/Captura%20de%20pantalla_2026-04-12_17-29-50.png)
+![imagen 4](./images/Screenshots/Captura%20de%20pantalla_2026-04-12_17-30-39.png)
+![imagen 5](./images/Screenshots/Captura%20de%20pantalla_2026-04-12_17-35-22.png)
+![imagen 6](./images/Screenshots/Captura%20de%20pantalla_2026-04-12_17-38-18.png)
+
 A continuación documentación técnica por IA:
 
 ## Tecnologías Utilizadas
