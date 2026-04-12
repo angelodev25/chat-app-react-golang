@@ -8,9 +8,7 @@ El principal obetivo es hacer la aplicación lo más segura y privada poible par
 
 Las funcionalidades integradas hasta ahora son: Creación y eliminación de chats, actualización de información de perfil, eliminación de mensanjes.
 
-Los mensajes son almacenado en una base de datos SQlite en un directorio específico para cada usuario (si, no es lo mejor, se cambiará), al igual su foto de perfil.
-
-Se trata de el primer proyecto que desarrollo, iré mejorándolo con el tiempo, el objetivo es que sea una aplicación funcional.
+Los mensajes son almacenado en una base de datos SQlite en un directorio específico para cada usuario, al igual su foto de perfil.
 
 A continuación documentación técnica por IA:
 
@@ -193,6 +191,10 @@ chat_app/
 └── README.md
 ```
 
+## Funcionalidades faltantes
+
+Se debe implementar métodos de seguridad de comunicación entre cliente y servidor entre cliente y servidor (https, encriptación...)
+
 ## Contribución
 
 1. Fork el proyecto
@@ -200,7 +202,3 @@ chat_app/
 3. Commit tus cambios (`git commit -m 'Add some AmazingFeature'`)
 4. Push a la rama (`git push origin feature/AmazingFeature`)
 5. Abre un Pull Request
-
-## Licencia
-
-Este proyecto está bajo la Licencia MIT. Ver el archivo `LICENSE` para más detalles.
