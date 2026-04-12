@@ -110,7 +110,7 @@ export function Sidebar({ setCurrent }: { setCurrent: Dispatch<SetStateAction<Ch
 									</div>
 									<div className="flex w-80">
 										<div className="flex  justify-between text-zinc-400 p-2">
-											{chat.lastMessage.content.length > 40 ? chat.lastMessage.content.split("\n")[0].substring(0, 37) + "..." : chat.lastMessage.content}
+											{chat.lastMessage.content.length > 36 ? chat.lastMessage.content.split("\n")[0].substring(0, 33) + "..." : chat.lastMessage.content}
 										</div>
 									</div>
 								</div>
