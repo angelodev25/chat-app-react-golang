@@ -21,7 +21,7 @@ import { Logo } from '@/components/Logo/Logo';
 import React, { useEffect, useState } from 'react';
 import { CloudUploadIcon } from 'lucide-react';
 import { toast } from 'sonner';
-import { useAuth } from '@/contexts/auth.context';
+import { useAuth } from '@/contexts/authContext';
 import { useNavigate } from 'react-router-dom';
 
 const signInFormSchema = z.object({

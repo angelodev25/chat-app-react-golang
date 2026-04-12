@@ -1,4 +1,4 @@
-import { useAuth } from "@/contexts/auth.context"
+import { useAuth } from "@/contexts/authContext"
 import { Loader } from "lucide-react"
 import type { JSX } from "react"
 import { Navigate } from "react-router-dom"

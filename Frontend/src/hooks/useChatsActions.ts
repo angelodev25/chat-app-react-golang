@@ -1,4 +1,4 @@
-import { useChatContext } from "@/contexts/chat_context"
+import { useChatContext } from "@/contexts/chatContext"
 import axios from "axios"
 import { toast } from "sonner"
 

@@ -1,4 +1,4 @@
-import { useChatContext } from "@/contexts/chat_context"
+import { useChatContext } from "@/contexts/chatContext"
 import useMessagesActions from "@/hooks/useMessagesActions"
 import type { Chat } from "@/types/message"
 import { Box, Skeleton, TextField } from "@mui/material"
@@ -131,7 +131,7 @@ export default function ChatArea(props: Props) {
 	}
 
 	return (
-		<div className="w-full bg-[#25253147] rounded-[20px] flex flex-col overflow-hidden h-full"
+		<div className="w-full bg-(--chat-box-background) rounded-[20px] flex flex-col overflow-hidden h-full"
 			style={{ height: 'calc(100vh - 2rem)' }}>
 			{/* Header */}
 			<div className="flex p-2 mb-3 border-b border-gray-500 flex-shrink-0" >
@@ -190,7 +190,7 @@ export default function ChatArea(props: Props) {
 										onContextMenu={(e) => handleContextMenu(e, msg.id, msg.content)}
 									>
 										<div className="relative group max-w-[70%]">
-											<p className={`p-3 rounded-[30px] ${msg.senderId === userId ? 'bg-[#232a3a77] hover:bg-[#232a3a99]' : 'bg-[#334a4b77] hover:bg-[#334a4b99]'} 
+											<p className={`p-3 rounded-[30px] ${msg.senderId === userId ? 'bg-(--own-message) hover:bg-[#232a35bf]' : 'bg-(--other-message) hover:bg-[#334a4b99]'} 
 												text-white transition-all duration-200 cursor-context-menu
 											`}>
 												{msg.content}
@@ -225,7 +225,7 @@ export default function ChatArea(props: Props) {
 					sx={{
 						'& .MuiFilledInput-root': {
 							color: 'white',
-							backgroundColor: 'rgba(97, 121, 121, 0.41)',
+							backgroundColor: 'var(--chat-input)',
 							'&:before': {
 								borderBottomColor: 'rgba(255,255,255,0.5)'
 							},
@@ -237,7 +237,7 @@ export default function ChatArea(props: Props) {
 							}
 						},
 						'& .MuiInputLabel-filled': {
-							color: 'rgba(210, 242, 248, 0.7)'
+							color: 'rgba(137, 154, 157, 0.7)'
 						},
 						'& .MuiFilledInput-input': {
 							color: 'white'

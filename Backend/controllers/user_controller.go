@@ -180,8 +180,8 @@ func UpdateUser(c *fiber.Ctx) error {
 		if user.Username == "" {
 			return c.Status(400).JSON(fiber.Map{"error": "No e puede tener un nombre de usuario vacio"})
 		}
-		if len(user.Username) < 3 || len(user.Username) > 20 {
-			return c.Status(400).JSON(fiber.Map{"error": "El nombre de usuario debe tener entre 3 y 20 caracteres"})
+		if len(user.Username) < 3 || len(user.Username) > 16 {
+			return c.Status(400).JSON(fiber.Map{"error": "El nombre de usuario debe tener entre 3 y 16 caracteres"})
 		}
 		checkQuery := `SELECT EXISTS(SELECT 1 FROM users WHERE username = $1 AND id != $2)`
 		var usernameExists bool

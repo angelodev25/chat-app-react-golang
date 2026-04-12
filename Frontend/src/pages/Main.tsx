@@ -1,7 +1,8 @@
 import ChatArea from "@/components/Chat/Chat";
 import { Sidebar } from "@/components/Sidebar";
-import { useAuth } from "@/contexts/auth.context";
-import { useChatContext } from "@/contexts/chat_context";
+import { useAuth } from "@/contexts/authContext";
+import { useChatContext } from "@/contexts/chatContext";
+import { useUserPreferences } from "@/contexts/userPreferencesContext";
 import type { Chat } from "@/types/message";
 import { useEffect, useRef, useState } from "react";
 import { Navigate } from "react-router-dom";
@@ -10,6 +11,7 @@ export default function Main() {
   const [currentChat, setCurrentChat] = useState<Chat | null>(null)
   const { userId } = useAuth()
   const { setChats } = useChatContext()
+  const { image } = useUserPreferences()
   const wsRef = useRef<WebSocket | null>(null)
   const token = localStorage.getItem("token_chat")
   if (!userId) return <Navigate to="/login" />
@@ -83,19 +85,19 @@ export default function Main() {
   return (
     <div className="relative flex min-h-screen font-sans overflow-hidden"
       style={{
-        backgroundImage: `url('/aperture-vintage-Z6EpCdMcoUU-unsplash.jpg)`,
-        backgroundSize: 'cover',
+        backgroundImage: `url('/backgrounds/${image}')`,
+        backgroundSize: '100% 100%',
         backgroundPosition: 'center',
         backgroundRepeat: 'no-repeat',
-        backgroundAttachment: 'fixed'
+        backgroundAttachment: 'scroll'
       }}
     >
-      <div className="absolute inset-0 bg-black/50"></div>
+      <div className="absolute inset-0 bg-black/20"></div>
       <Sidebar setCurrent={setCurrentChat} />
       <div className="relative flex-1 p-4 mr-100 overflow-hidden">
         {currentChat ? <ChatArea chat={currentChat} userId={userId} /> : (
-          <div className="bg-[#a7b7da10] rounded-lg p-4 h-full">
-            <p className="flex h-full justify-center items-center text-xl" >Abre un chat para empezar</p>
+          <div className="rounded-lg p-4 h-full">
+            <p className="flex h-full justify-center items-center bg-(--chat-box-background) rounded-lg text-2xl text-gray-400" >Empieza abriendo un chat</p>
           </div>
         )}
       </div>

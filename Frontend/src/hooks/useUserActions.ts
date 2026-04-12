@@ -1,4 +1,4 @@
-import { useAuth } from "@/contexts/auth.context"
+import { useAuth } from "@/contexts/authContext"
 import { useToastPromise } from "@/utils/showPromiseToast"
 import axios from "axios"
 import { toast } from "sonner"
