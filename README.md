@@ -88,7 +88,7 @@ La aplicación sigue una arquitectura cliente-servidor con separación clara ent
     - `types/`: Definiciones de tipos TypeScript
     - `utils/`: Utilidades (tema MUI, etc.)
 
-- **Estado Global**: Utiliza React Context para manejar autenticación de usuario y estado de chats.
+- **Estado Global**: Utiliza React Context para manejar autenticación de usuario, estado de chats y manejo de selección del tema.
 
 - **WebSockets**: Conecta a los endpoints del backend para recibir actualizaciones en tiempo real.
 
@@ -97,42 +97,11 @@ La aplicación sigue una arquitectura cliente-servidor con separación clara ent
 ### Prerrequisitos
 - Go 1.25.7 o superior
 - Node.js y npm
-- PostgreSQL o SQLite (configurable)
+- PostgreSQL y SQLite (opcional para visualizar DB de mensajes) 
 
-### Backend
-1. Navega al directorio `Backend/`:
-   ```bash
-   cd Backend
-   ```
+### Inicialización
+- En el directorio raíz ejecutar `make run`, se instalarán todas las dependencias e iniciará el programa
 
-2. Instala dependencias:
-   ```bash
-   go mod tidy
-   ```
-
-3. Configura la base de datos en `database/db.go` (por defecto usa SQLite).
-
-4. Ejecuta el servidor:
-   ```bash
-   go run cmd/main.go
-   ```
-   El servidor estará disponible en `http://localhost:8080`.
-
-### Frontend
-1. Navega al directorio `Frontend/`:
-   ```bash
-   cd Frontend
-   ```
-
-2. Instala dependencias:
-   ```bash
-   npm install
-   ```
-
-3. Inicia el servidor de desarrollo:
-   ```bash
-   npm run dev
-   ```
    La aplicación estará disponible en `http://localhost:5174`.
 
 ## Uso
@@ -145,6 +114,7 @@ La aplicación sigue una arquitectura cliente-servidor con separación clara ent
 
 4. **Funcionalidades Adicionales**:
    - Actualizar perfil de usuario
+   - Selección de tres temas de colores para la UI
    - Eliminar mensajes y chats
    - Estado online de usuarios
 
@@ -172,6 +142,7 @@ La aplicación sigue una arquitectura cliente-servidor con separación clara ent
 ### UsersHub (Estado de Chats)
 - **Nuevo Chat**: Recibe un objeto `Chat` cuando se crea un nuevo chat.
 - **Mensaje Nuevo**: Recibe un objeto con `code: "message"` y el mensaje actualizado.
+- **Mensaje Eliminado**: Recibe un objeto con `code: "delete-single`o `code: "delete-all"` (eliminar solo para él o para ambos) y con el ID del mensaje en `content`.
 - **Chat Eliminado**: Recibe un objeto con `code: "delete"` y el ID del chat eliminado.
 
 ### ChatsHub (Mensajes en Chat)
