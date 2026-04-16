@@ -1,36 +1,43 @@
-import { useChatContext } from "@/contexts/chatContext"
 import useMessagesActions from "@/hooks/useMessagesActions"
 import type { Chat } from "@/types/message"
-import { Box, Skeleton, TextField } from "@mui/material"
+import { Box, Button, Skeleton, TextField } from "@mui/material"
 import { Copy, Send, Trash2 } from "lucide-react"
-import React, { useEffect, useRef, useState } from "react"
+import React, { useEffect, useRef, useState, type Dispatch, type SetStateAction } from "react"
 import { toast } from "sonner"
 import AccountCircle from '@mui/icons-material/AccountCircle';
 import { useCopyToClipboard } from "@/hooks/useCopyToClipboard"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog"
 
 type Props = {
 	userId: string
 	chat: Chat
+	chats: Chat[]
+	setChats: Dispatch<SetStateAction<Chat[]>>
 }
 
 const API_URL = import.meta.env.VITE_API_URL
+const WS_URL = import.meta.env.VITE_WS_URL
 
 export default function ChatArea(props: Props) {
-	const { chat, userId } = props
-	const { chats, setChats } = useChatContext()
+	const { chat, userId, setChats } = props
 	const [message, setMessage] = useState("")
-	const { messages, setMessages, loading, deleteMessage } = useMessagesActions(chat.id)
+	const { messages, setMessages, loading } = useMessagesActions(chat.id)
 	const [contextMenu, setContextMenu] = useState<{
 		visible: boolean
 		x: number
 		y: number
 		messageId: string
+		messageSender: string
 		content: string
 	} | null>(null)
+	const [openDelete, setOpenDelete] = useState(false)
 	const messagesEndRef = useRef<HTMLDivElement>(null);
 	const { copyToClipboard } = useCopyToClipboard()
 	const token = localStorage.getItem("token_chat")
 	const wsRef = useRef<WebSocket | null>(null);
+	const [messageId, setMessageId] = useState<string | null>(null)
+	const [messageSender, setMessageSender] = useState<string | null>(null)
+	const chatId = chat.id
 
 	const scrollToBottom = () => {
 		messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -38,16 +45,24 @@ export default function ChatArea(props: Props) {
 
 	useEffect(() => {
 		try {
-			const ws = new WebSocket(`ws://10.7.0.38:8080/api/ws/${chat.id}?token=${token}`);
+			const ws = new WebSocket(`${WS_URL}/${chatId}?token=${token}`);
 			ws.onopen = () => {
 				console.log("Websocket conectado.")
 				ws.send(JSON.stringify({ "code": "readed", "content": "", "target": "" }))
 			}
 
 			ws.onmessage = (event) => {
-				const message = JSON.parse(event.data);
-				setMessages((prev) => [...prev, message]);
-				setChats(chats.map((toUpdate) => toUpdate.id === chat.id ? { ...toUpdate, lastMessage: message } : toUpdate))
+				const data = JSON.parse(event.data);
+				switch (data.code) {
+					case "message":
+						handleNewMessage(data.message)
+						break
+					case "delete":
+						handleRemoveMessage(data.id)
+						break
+					default:
+						console.log("codigo inválido")
+				}
 			}
 
 			wsRef.current = ws
@@ -57,12 +72,40 @@ export default function ChatArea(props: Props) {
 		return () => wsRef.current?.close();
 	}, [chat.id])
 
+	const handleNewMessage = (message: any) => {
+		setMessages((prev) => [...prev, message]);
+		setChats((prevChats) =>
+			prevChats.map((c) =>
+				c.id === chatId ? { ...c, lastMessage: message } : c
+			)
+		);
+	}
+
+	const handleRemoveMessage = (id: any) => {
+		setMessages((currentMessages) => {
+			const filteredMessages = currentMessages.filter((msg) => msg.id !== id)
+
+			setChats((prevChats) => {
+				const currentChat = prevChats.find((c) => c.id === chatId)
+				if (currentChat?.lastMessage.id === id) {
+					const newLastMessage = filteredMessages[filteredMessages.length - 1]
+					return prevChats.map((c) =>
+						c.id === chatId ? { ...c, lastMessage: newLastMessage } : c
+					)
+				}
+				return prevChats
+			})
+
+			return filteredMessages
+		})
+	}
+
 	// Cerrar menú contextual al hacer click fuera
 	useEffect(() => {
 		const handleClickOutside = () => {
 			setContextMenu(null)
 		}
-		
+
 		const handleScroll = () => {
 			setContextMenu(null)
 		}
@@ -88,7 +131,17 @@ export default function ChatArea(props: Props) {
 			setMessage('');
 		} catch (e: any) {
 			console.log(e)
-			toast.error("Error al enviar mensaje.", { description: e.message })
+			toast.error("Error al enviar mensaje:(. Intenta en un rato")
+		}
+	}
+
+	const deleteMessage = async (scope: string) => {
+		try {
+			wsRef.current?.send(JSON.stringify({ "code": `delete-${scope}`, "content": messageId, "target": chat.otherUserID }))
+			setOpenDelete(false)
+		} catch (e: any) {
+			console.log(e)
+			toast.error("Ocurrió un error eliminando el mensaje:(. Intenta en un rato")
 		}
 	}
 
@@ -112,20 +165,14 @@ export default function ChatArea(props: Props) {
 		setContextMenu(null)
 	}
 
-	const handleDeleteMessage = async (messageId: string) => {
-		if (confirm("¿Estás seguro de que quieres eliminar este mensaje?")) {
-			await deleteMessage(chat.id, messageId)
-		}
-		setContextMenu(null)
-	}
-
-	const handleContextMenu = (e: React.MouseEvent, messageId: string, content: string) => {
+	const handleContextMenu = (e: React.MouseEvent, messageId: string, sender: string, content: string) => {
 		e.preventDefault()
 		setContextMenu({
 			visible: true,
 			x: e.clientX,
 			y: e.clientY,
 			messageId,
+			messageSender: sender,
 			content
 		})
 	}
@@ -170,7 +217,7 @@ export default function ChatArea(props: Props) {
 									minute: '2-digit',
 									hour12: true
 								});
-								
+
 								if (msg.senderId === "server") {
 									return (
 										<div key={msg.id} className="flex w-full justify-center my-2">
@@ -182,15 +229,15 @@ export default function ChatArea(props: Props) {
 										</div>
 									)
 								}
-								
+
 								return (
 									<div
 										key={msg.id}
 										className={`m-2 flex ${msg.senderId === userId ? 'justify-end' : 'justify-start'}`}
-										onContextMenu={(e) => handleContextMenu(e, msg.id, msg.content)}
+										onContextMenu={(e) => handleContextMenu(e, msg.id, msg.senderId, msg.content)}
 									>
 										<div className="relative group max-w-[70%]">
-											<p className={`p-3 rounded-[30px] ${msg.senderId === userId ? 'bg-(--own-message) hover:bg-[#232a35bf]' : 'bg-(--other-message) hover:bg-[#334a4b99]'} 
+											<p className={`p-3 rounded-[30px] ${msg.senderId === userId ? 'bg-(--own-message) hover:bg-[#232a35bf]' : 'bg-(--other-message) hover:bg-(--other-message-hover)'} 
 												text-white transition-all duration-200 cursor-context-menu
 											`}>
 												{msg.content}
@@ -262,8 +309,8 @@ export default function ChatArea(props: Props) {
 			{contextMenu?.visible && (
 				<div
 					className="fixed z-50 bg-gray-800 rounded-lg shadow-xl border border-gray-700 py-1 min-w-[160px]"
-					style={{ 
-						top: contextMenu.y, 
+					style={{
+						top: contextMenu.y,
 						left: contextMenu.x,
 						transform: 'translate(0, 0)'
 					}}
@@ -275,16 +322,36 @@ export default function ChatArea(props: Props) {
 						<Copy className="h-4 w-4" />
 						<span>Copiar texto</span>
 					</button>
-					
+
 					<button
 						className="w-full px-4 py-2 text-left text-sm hover:bg-gray-700 text-red-400 flex items-center gap-2 transition-colors"
-						onClick={() => handleDeleteMessage(contextMenu.messageId)}
+						onClick={() => {
+							setMessageId(contextMenu.messageId)
+							setMessageSender(contextMenu.messageSender)
+							setContextMenu(null)
+							setOpenDelete(true)
+						}}
 					>
 						<Trash2 className="h-4 w-4" />
-						<span>Eliminar mensaje</span>
+						Eliminar mensaje
 					</button>
+
+
 				</div>
 			)}
+			<Dialog open={openDelete} onOpenChange={setOpenDelete} >
+				<DialogContent aria-describedby="">
+					<DialogHeader>
+						<DialogTitle>Eliminar mensaje</DialogTitle>
+					</DialogHeader>
+					<div className="flex justify-end gap-x-5 py-4">
+						{messageSender === userId && (
+							<Button variant="contained" color="error" onClick={() => deleteMessage("all")} >Eliminar para todos</Button>
+						)}
+						<Button variant="outlined" color="error" onClick={() => deleteMessage("single")} >Sólo para mí</Button>
+					</div>
+				</DialogContent>
+			</Dialog>
 		</div>
 	)
 }

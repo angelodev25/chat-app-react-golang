@@ -1,8 +1,6 @@
 package services
 
 import (
-	"log"
-
 	"github.com/gofiber/websocket/v2"
 )
 
@@ -12,14 +10,12 @@ var usersHub *UsersHub
 func SaveChatsHub(hub *ChatsHub) {
 	if chatsHub == nil {
 		chatsHub = hub
-		log.Println("Hub de chats almacendo en variable global: ", chatsHub)
 	}
 }
 
 func SaveUsersHub(hub *UsersHub) {
 	if usersHub == nil {
 		usersHub = hub
-		log.Println("Hub de usuarios en linea almacendo en variable global: ", usersHub)
 	}
 }
 

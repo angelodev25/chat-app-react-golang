@@ -14,6 +14,5 @@ func PrivateRoutes(app *fiber.App) {
 	route.Get("/chat/:chatId", middleware.JWTMiddleware(), controllers.LoadChatMessages)
 	route.Post("/chats", middleware.JWTMiddleware(), controllers.CreateChat)
 	route.Put("/user/update", middleware.JWTMiddleware(), controllers.UpdateUser)
-	route.Delete("/chat/:chatId/msg/:messageId", middleware.JWTMiddleware(), controllers.DeleteMessage)
 	route.Delete("/chat/:chatId", middleware.JWTMiddleware(), controllers.DeleteChat)
 }

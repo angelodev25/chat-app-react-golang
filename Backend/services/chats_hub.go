@@ -175,9 +175,13 @@ func (h *ChatsHub) readMessage(client *Client) {
 
 		switch incoming.Code {
 		case "send":
-			go SaveMessage(h, client, incoming.Content, incoming.TargetUser)
+			go h.SaveMessage(client, incoming.Content, incoming.TargetUser)
 		case "readed":
-			go MarkMessagesAsReaded(client.UserID, client.ChatID)
+			go h.MarkMessagesAsReaded(client.UserID, client.ChatID)
+		case "delete-all":
+			go h.DeleteMessageForBothUsers(client.ChatID, incoming.Content, incoming.TargetUser)
+		case "delete-single":
+			go h.DeleteMessageForSingleUser(client.ChatID, incoming.Content, client)
 		}
 	}
 }

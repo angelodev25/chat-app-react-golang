@@ -8,10 +8,6 @@ import (
 	_ "modernc.org/sqlite"
 )
 
-/*
-sudo -u postgres psql
-*/
-
 var DB *sql.DB // Base de datos postgres que guardará usuarios y informacion de chats
 var err error
 

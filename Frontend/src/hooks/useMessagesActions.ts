@@ -24,10 +24,11 @@ export default function useMessagesActions(chatId: string) {
 		}
 	}
 
-	const deleteMessage = async (chatId: string, messageId: string) => {
+	const deleteMessage = async (chatId: string, messageId: string, scope: string) => {
 		try {
-			const res = await axios.delete(`${API_URL}/api/chat/${chatId}/msg/${messageId}`, { headers: { Authorization: token }})
+			const res = await axios.delete(`${API_URL}/api/chat/${chatId}/msg/${messageId}`, { headers: { Authorization: token }, params: { scope: scope } })
 			setMessages((prev) => prev.filter(msg => msg.id !== res.data.id))
+			console.log(messages)
 		} catch (e: any) {
 			console.log(e)
 			toast.error(e.response?.data?.error || "No se pudo borrar el mensaje")

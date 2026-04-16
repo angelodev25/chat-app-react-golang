@@ -132,7 +132,7 @@ func CreateChat(c *fiber.Ctx) error {
 		var uh = services.GetUsersHub()
 		uh.Add <- services.InfoChannel{Chat: &chatToOtherUser, UserID: otherUser.ID}
 
-		return c.Status(201).JSON(fiber.Map{"message": "Chat creado exitoamente!", "chat": chatToCurrentUser})
+		return c.Status(201).JSON(fiber.Map{"chat": chatToCurrentUser})
 	} else {
 		return c.Status(404).JSON(fiber.Map{"error": "No se pudo encontrar al usuario que buscas."})
 	}

@@ -76,7 +76,7 @@ func (u *UsersHub) SetOnline(conn *websocket.Conn) {
 	for {
 		_, _, err := conn.ReadMessage()
 		if err != nil {
-			log.Println("Error leyendo mensaes: ", err)
+			log.Println("Error leyendo mensajes: ", err)
 			break
 		}
 	}
@@ -96,7 +96,7 @@ func (u *UsersHub) SendChatToClient(data InfoChannel) {
 			return
 		}
 	} else {
-		log.Println("El usuario no esta en el hub de chats")
+		log.Println("El usuario no esta en linea")
 	}
 }
 

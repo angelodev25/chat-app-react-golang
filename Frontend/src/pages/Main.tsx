@@ -7,10 +7,12 @@ import type { Chat } from "@/types/message";
 import { useEffect, useRef, useState } from "react";
 import { Navigate } from "react-router-dom";
 
+const WS_URL = import.meta.env.VITE_WS_URL
+
 export default function Main() {
   const [currentChat, setCurrentChat] = useState<Chat | null>(null)
   const { userId } = useAuth()
-  const { setChats } = useChatContext()
+  const { chats, setChats } = useChatContext()
   const { image } = useUserPreferences()
   const wsRef = useRef<WebSocket | null>(null)
   const token = localStorage.getItem("token_chat")
@@ -21,7 +23,7 @@ export default function Main() {
 
     const connectWebSocket = () => {
       try {
-        ws = new WebSocket(`ws://10.7.0.38:8080/api/ws/connect/chat?token=${token}`);
+        ws = new WebSocket(`${WS_URL}/connect/chat?token=${token}`);
 
         ws.onopen = () => {
           console.log("websocket conectado. Usuario en línea:)");
@@ -95,7 +97,7 @@ export default function Main() {
       <div className="absolute inset-0 bg-black/20"></div>
       <Sidebar setCurrent={setCurrentChat} />
       <div className="relative flex-1 p-4 mr-100 overflow-hidden">
-        {currentChat ? <ChatArea chat={currentChat} userId={userId} /> : (
+        {currentChat ? <ChatArea chat={currentChat} userId={userId} chats={chats} setChats={setChats} /> : (
           <div className="rounded-lg p-4 h-full">
             <p className="flex h-full justify-center items-center bg-(--chat-box-background) rounded-lg text-2xl text-gray-400" >Empieza abriendo un chat</p>
           </div>

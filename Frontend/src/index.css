@@ -53,6 +53,7 @@ body {
   --chat-box-background: rgba(4, 33, 45, 0.449);
   --own-message: rgba(24, 30, 32, 0.736);
   --other-message: rgba(66, 74, 81, 0.736);
+  --other-message-hover: rgba(41, 55, 63, 0.736);
   --chat-input: rgba(31, 47, 56, 0.619);
   --profile-settings-gradient-start: rgb(2, 2, 2);
   --profile-settings-gradient-middle: rgb(14, 33, 49);
@@ -97,8 +98,9 @@ body {
   --sidebar-user-info-background: rgba(44, 50, 62, 0.422);
   --sidebar-chat-background: rgba(27, 54, 78, 0.672);
   --chat-box-background: rgba(5, 8, 23, 0.449);
-  --own-message: rgba(24, 30, 32, 0.736);
-  --other-message: rgba(66, 74, 81, 0.736);
+  --own-message: rgba(21, 30, 36, 0.847);
+  --other-message: rgba(55, 63, 71, 0.814);
+  --other-message-hover: rgba(39, 46, 54, 0.736);
   --chat-input: rgba(23, 34, 44, 0.619);
   --profile-settings-gradient-start: rgb(2, 2, 2);
   --profile-settings-gradient-middle: rgb(21, 30, 47);
@@ -143,8 +145,9 @@ body {
   --sidebar-user-info-background: rgba(31, 38, 55, 0.422);
   --sidebar-chat-background: rgba(27, 35, 61, 0.629);
   --chat-box-background: rgba(5, 5, 8, 0.633);
-  --own-message: rgba(40, 40, 52, 0.736);
+  --own-message: rgba(30, 30, 39, 0.736);
   --other-message: rgba(73, 73, 105, 0.736);
+  --other-message-hover: rgba(47, 57, 82, 0.736);
   --chat-input: rgba(37, 40, 52, 0.718);
   --profile-settings-gradient-start: rgb(2, 2, 2);
   --profile-settings-gradient-middle: rgb(26, 26, 32);
