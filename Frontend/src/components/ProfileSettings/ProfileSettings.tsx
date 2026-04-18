@@ -13,6 +13,7 @@ import 'react-lazy-load-image-component/src/effects/blur.css';
 import { LazyLoadImage } from "react-lazy-load-image-component";
 import { useUserPreferences } from "@/contexts/userPreferencesContext";
 import { useTheme } from "@/contexts/themeContext";
+import ImageModal from "./Modals/ImageModal";
 
 const API_URL = import.meta.env.VITE_API_URL
 
@@ -113,8 +114,8 @@ function ProfileSettings() {
 									}
 								`}
 							>
-								{user && user?.profileName.length > 15 ? <p className="text-2xl font-bold text-slate-400">{user?.profileName.substring(0,13) + "..."}</p> : 
-								<p className="text-2xl font-bold text-slate-400">{user?.profileName}</p>}
+								{user && user?.profileName.length > 15 ? <p className="text-2xl font-bold text-slate-400">{user?.profileName.substring(0, 13) + "..."}</p> :
+									<p className="text-2xl font-bold text-slate-400">{user?.profileName}</p>}
 							</div>
 						</div>
 					</div>
@@ -175,8 +176,10 @@ function ProfileSettings() {
 									}
 								`}
 							>
-								{user && user?.username.length > 15 ? <p className="text-2xl font-bold text-slate-400">{user?.username.substring(0,13) + "..."}</p> : 
-								<p className="text-2xl font-bold text-slate-400">{user?.username}</p>}
+								{user && user?.username.length > 15 ?
+									<p className="text-2xl font-bold text-slate-400">{user?.username.substring(0, 13) + "..."}</p> :
+									<p className="text-2xl font-bold text-slate-400">{user?.username}</p>
+								}
 							</div>
 						</div>
 					</div>
@@ -218,7 +221,7 @@ function ProfileSettings() {
 								aria-controls="panel1-content"
 								id="panel1-header"
 							>
-								<Typography component="span">Seleccionar el fondo de la aplicación</Typography>
+								<Typography component="span">Seleccionar el tema de la aplicación</Typography>
 							</AccordionSummary>
 							<AccordionDetails>
 								<div className="flex gap-3 flex-wrap" >
@@ -229,7 +232,7 @@ function ProfileSettings() {
 											<div key={index} className="relative flex cursor-pointer" onClick={() => {
 												changeBackground(img)
 												setTheme(theme)
-												}} >
+											}} >
 												{isLoading && (
 													<div className="w-30 h-20 flex items-center justify-center bg-gray-800 rounded-md shadow-md">
 														<Loader2 className="animate-spin text-cyan-500 w-6 h-6" />
@@ -259,29 +262,7 @@ function ProfileSettings() {
 			</div>
 
 			{/* Modal de imagen */}
-			{openImage && (
-				<div
-					className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center"
-					onClick={() => setOpenImage(false)}
-				>
-					<button
-						className="absolute top-4 right-4 text-white hover:text-gray-300"
-						onClick={() => setOpenImage(false)}
-					>
-						<X className="w-8 h-8" />
-					</button>
-					{user?.profileImage ? (
-						<img
-							src={`${API_URL}${user?.profileImage}`}
-							className="max-w-[90vw] max-h-[90vh] object-contain rounded-lg"
-							alt="Foto de perfil"
-							onClick={(e) => e.stopPropagation()}
-						/>
-					) : (
-						<AccountCircle className="w-64 h-64 text-gray-400" />
-					)}
-				</div>
-			)}
+			{openImage && <ImageModal setOpen={setOpenImage} />}
 		</div>
 	)
 }

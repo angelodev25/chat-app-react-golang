@@ -112,7 +112,7 @@ func CreateChat(c *fiber.Ctx) error {
 			messsages := []models.Message{*chatToCurrentUser.LastMessage, *chatToOtherUser.LastMessage}
 
 			for i, dir := range dirs {
-				userDB, err := database.InitMessagesDB(dir)
+				userDB, err := database.GetMessagesDB(dir)
 				if err != nil {
 					log.Printf("Error al abrir base de datos para el usuario con dir %s: %v", dir, err)
 					continue
@@ -172,7 +172,7 @@ func GetUserChats(c *fiber.Ctx) error {
 	}
 	defer rows.Close()
 
-	userDB, err := database.InitMessagesDB(user.Dir)
+	userDB, err := database.GetMessagesDB(user.Dir)
 	if err != nil {
 		log.Println("Error al obtener la base de datos de mensajes: ", err)
 		return c.Status(500).JSON(fiber.Map{"error": "Error del servidor"})
@@ -227,7 +227,7 @@ func DeleteChat(c *fiber.Ctx) error {
 			log.Println("Error obtieniendo directorio: ", err)
 			break
 		}
-		userDB, err := database.InitMessagesDB(userDir)
+		userDB, err := database.GetMessagesDB(userDir)
 		if err != nil {
 			log.Println("Error abriendo DB: ", err)
 			break

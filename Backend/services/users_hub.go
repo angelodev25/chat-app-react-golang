@@ -84,7 +84,7 @@ func (u *UsersHub) SetOnline(conn *websocket.Conn) {
 }
 
 func (u *UsersHub) SendChatToClient(data InfoChannel) {
-	if userConn, ok := u.UsersOnline[data.UserID]; ok {
+	if userConn, ok := IsOnline(data.UserID); ok {
 		parsed, err := json.Marshal(data)
 		if err != nil {
 			log.Println("Error parseando struct InfoChannel: ", err)
@@ -105,7 +105,7 @@ func (u *UsersHub) SendDeleteChat(chat models.Chat) {
 
 	for _, id := range users {
 		u.mu.RLock()
-		conn, ok := u.UsersOnline[id]
+		conn, ok := IsOnline(id)
 		u.mu.RUnlock()
 		if ok && conn != nil {
 			data := struct {

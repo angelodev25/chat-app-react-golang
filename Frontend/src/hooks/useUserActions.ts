@@ -6,17 +6,17 @@ import { toast } from "sonner"
 const API_URL = import.meta.env.VITE_API_URL
 
 export default function useUserActions() {
-    const {user, setUser} = useAuth()
-    const {showToast} = useToastPromise()
+    const { user, setUser } = useAuth()
+    const { showToast } = useToastPromise()
     const token = localStorage.getItem("token_chat")
 
     const updateProfileName = async (name: string) => {
         try {
             showToast("Actualizando...")
-            const res = await axios.put(`${API_URL}/api/user/update`, {...user!, profileName: name} , {headers: {Authorization: `Bearer ${token}`}})
+            const res = await axios.put(`${API_URL}/api/user/update`, { ...user!, profileName: name }, { headers: { Authorization: `Bearer ${token}` } })
             setUser(res.data.user)
             toast.success("Nombre de perfil actualizado")
-        }catch(e: any) {
+        } catch (e: any) {
             console.log(e)
             toast.error(e.response?.data?.error || "Ocurrió un error inesperado :(")
         }
@@ -25,10 +25,10 @@ export default function useUserActions() {
     const updateUsername = async (username: string) => {
         try {
             showToast("Actualizando...")
-            const res = await axios.put(`${API_URL}/api/user/update`, {...user!, username: username}, {headers: {Authorization: `Bearer ${token}`}})
+            const res = await axios.put(`${API_URL}/api/user/update`, { ...user!, username: username }, { headers: { Authorization: `Bearer ${token}` } })
             setUser(res.data.user)
             toast.success("Nombre de usuario actualizado")
-        }catch(e: any) {
+        } catch (e: any) {
             console.log(e)
             if (e.response?.data?.error === "ya existe") {
                 toast.error("Ya existe alguien con ese nombre de usuario, prueba otro.")
@@ -36,10 +36,24 @@ export default function useUserActions() {
                 toast.error(e.response?.data?.error || "Ocurrió un error inesperado :(")
             }
         }
-    }   
-    
+    }
+
+    const updateProfileImage = async (image: File) => {
+        try {
+            const form = new FormData()
+            form.append('file', image)
+            const res = await axios.put(`${API_URL}/api/user/update`, form, { headers: { 'Content-Type': 'multipart/form-data', Authorization: `Bearer ${token}` } })
+            toast.success("Foto de perfil actualizada")
+            setUser(res.data.user)
+        } catch (e: any) {
+            console.log(e)
+            toast.error(e.response?.data?.error || "Ocurrió un error inesperado :( prueba más tarde")
+        }
+    }
+
     return {
         updateProfileName,
-        updateUsername
+        updateUsername,
+        updateProfileImage
     }
 }

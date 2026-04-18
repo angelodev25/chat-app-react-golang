@@ -65,7 +65,7 @@ func (h *ChatsHub) SendMessageToDisconnected(userId string, message models.Messa
 		return
 	}
 
-	userDB, err := sql.Open("sqlite", userDir+"/messagesDB.db")
+	userDB, err := database.GetMessagesDB(userDir)
 	if err != nil {
 		log.Println("Error al abrir base de datos: ", err)
 		return
@@ -107,7 +107,7 @@ func (h *ChatsHub) MarkMessagesAsReaded(userId, chatId string) {
 		return
 	}
 
-	userDB, err := database.InitMessagesDB(userDir)
+	userDB, err := database.GetMessagesDB(userDir)
 	if err != nil {
 		log.Println("Error al abrir base de datos: ", err)
 		return
@@ -189,7 +189,7 @@ func (h *ChatsHub) DeleteMessageForDisconnected(chatId, messageId, userId string
 		return
 	}
 
-	userDB, err := database.InitMessagesDB(userDir)
+	userDB, err := database.GetMessagesDB(userDir)
 	if err != nil {
 		log.Println("Error al abrir base de datos: ", err)
 		return

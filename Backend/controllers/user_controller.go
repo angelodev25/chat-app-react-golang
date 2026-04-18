@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"log"
 	"math/rand"
+	"os"
 	"strconv"
 	"strings"
 
@@ -23,7 +24,7 @@ func CreateUser(c *fiber.Ctx) error {
 	email := c.FormValue("email")
 	password := c.FormValue("password")
 	imagePath := ""
-	username := strings.ToLower(name) + strconv.Itoa(rand.Intn(9999)+1000) // nombre de usuario unico a partir del nombre y un numero aleatorio
+	username := strings.ToLower(name) + strconv.Itoa(rand.Intn(99999)+10000) // nombre de usuario unico a partir del nombre y un numero aleatorio
 
 	if name == "" || email == "" || password == "" {
 		return c.Status(400).JSON(fiber.Map{"error": "No se proporcionaron lo datos necesarios"})
@@ -35,18 +36,24 @@ func CreateUser(c *fiber.Ctx) error {
 	}
 
 	// Genera el directorio de archivos del usuario
-	userDir, userUploadsDir, err := utils.InitUserDir(userId)
+	userDir, _, err := utils.InitUserDir(userId)
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{"error": "No se pudo crear la carpeta del usuario"})
 	}
+
+	userDB, err := database.InitMessagesDB(userDir)
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{"error": "Error creando la base de datos de mensajes"})
+	}
+	defer userDB.Close()
 
 	// Si hay una imagen la guarda
 	if file != nil {
 		if file.Size > 4*1024*1024 {
 			return c.Status(400).JSON(fiber.Map{"error": "El archivo es muy grande. El tamaño máximo es de 4MB."})
 		}
-		path, err := utils.UploadImage(c, userId, userUploadsDir)
+		path, err := utils.UploadImage(c, userId)
 		if err != nil {
 			c.Status(500).JSON(fiber.Map{"error": "No se pudo guardar el archivo"})
 		} else {
@@ -149,11 +156,6 @@ func LoginUser(c *fiber.Ctx) error {
 
 func UpdateUser(c *fiber.Ctx) error {
 	var user models.User
-	if err := c.BodyParser(&user); err != nil {
-		log.Println(err)
-		return c.Status(400).JSON(fiber.Map{"error": "Petición inválida"})
-	}
-
 	userId := c.Locals("userId").(string)
 	existingUser, exists := GetUserByID(userId)
 	if !exists {
@@ -161,14 +163,44 @@ func UpdateUser(c *fiber.Ctx) error {
 		return c.Status(404).JSON(fiber.Map{"error": "Usuario no encontrado"})
 	}
 
-	// Solo se pueden actualizar el nombre, la imagen de perfil y el nombre de usuario
+	// Si la cabecera es multipart/form-data se asume (es seguro) que se esta actualizando la foto de perfil, sino actualiza nombre de perfil o de usuario dependiendo los datos que
+	// lleguen en el body.
+	if strings.HasPrefix(string(c.Request().Header.ContentType()), "multipart/form-data") {
+		newImagePath, err := utils.UploadImage(c, userId)
+		if err != nil {
+			log.Println("Error al subir la imagen: ", err)
+			return c.Status(500).JSON(fiber.Map{"error": "No se pudo subir la imagen"})
+		}
+		query := `UPDATE users SET profile_image = $1 WHERE id = $2`
+		_, err = database.DB.Exec(query, newImagePath, userId)
+		if err != nil {
+			log.Println("Error al actualizar la imagen de perfil: ", err)
+			return c.Status(500).JSON(fiber.Map{"error": "No se pudo actualizar la imagen de perfil, intenta más tarde."})
+		}
+
+		err = os.Remove("./users_storage" + existingUser.ProfileImage) // Elimina la imagen anterior del servidor
+		if err != nil {
+			log.Println("Error al eliminar antigua imagen: ", err)
+		}
+
+		existingUser.ProfileImage = newImagePath
+		return c.Status(200).JSON(fiber.Map{"user": existingUser})
+	} else {
+		if err := c.BodyParser(&user); err != nil {
+			log.Println(err)
+			return c.Status(400).JSON(fiber.Map{"error": "Petición inválida"})
+		}
+	}
+
+	// Solo se pueden actualizar el nombre de perfil o el de usuario
 	if user.ProfileName != existingUser.ProfileName {
 		if user.ProfileName == "" {
-			return c.Status(400).JSON(fiber.Map{"error": "No e puede tener un nombre de usuario vacio"})
+			return c.Status(400).JSON(fiber.Map{"error": "No se puede tener un nombre de perfil vacio"})
 		}
 		if len(user.ProfileName) < 3 || len(user.ProfileName) > 20 {
 			return c.Status(400).JSON(fiber.Map{"error": "El nombre de perfil debe tener entre 3 y 20 caracteres"})
 		}
+
 		query := `UPDATE users SET profile_name = $1 WHERE id = $2`
 		_, err := database.DB.Exec(query, user.ProfileName, userId)
 		if err != nil {
@@ -176,13 +208,15 @@ func UpdateUser(c *fiber.Ctx) error {
 			return c.Status(500).JSON(fiber.Map{"error": "No se pudo actualizar el nombre de perfil"})
 		}
 		existingUser.ProfileName = user.ProfileName
+
 	} else if user.Username != existingUser.Username {
 		if user.Username == "" {
-			return c.Status(400).JSON(fiber.Map{"error": "No e puede tener un nombre de usuario vacio"})
+			return c.Status(400).JSON(fiber.Map{"error": "No puedes tener un nombre de usuario vacio"})
 		}
 		if len(user.Username) < 3 || len(user.Username) > 16 {
 			return c.Status(400).JSON(fiber.Map{"error": "El nombre de usuario debe tener entre 3 y 16 caracteres"})
 		}
+
 		checkQuery := `SELECT EXISTS(SELECT 1 FROM users WHERE username = $1 AND id != $2)`
 		var usernameExists bool
 		err := database.DB.QueryRow(checkQuery, user.Username, userId).Scan(&usernameExists)
@@ -193,6 +227,7 @@ func UpdateUser(c *fiber.Ctx) error {
 		if usernameExists {
 			return c.Status(400).JSON(fiber.Map{"error": "Ese nombre de usuario no estña diponible"})
 		}
+
 		query := `UPDATE users SET username = $1 WHERE id = $2`
 		_, err = database.DB.Exec(query, user.Username, userId)
 		if err != nil {
@@ -201,6 +236,7 @@ func UpdateUser(c *fiber.Ctx) error {
 		}
 		existingUser.Username = user.Username
 	}
+
 	return c.Status(200).JSON(fiber.Map{"user": existingUser})
 }
 

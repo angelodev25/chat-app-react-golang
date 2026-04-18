@@ -81,6 +81,10 @@ func InitMessagesDB(dir string) (*sql.DB, error) {
 	return db, nil
 }
 
+func GetMessagesDB(dir string) (*sql.DB, error) {
+	return sql.Open("sqlite", dir+"/messagesDB.db")
+}
+
 // Cierra la conexión a la base de datos postgres
 func CloseDB() {
 	if DB != nil {

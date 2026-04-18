@@ -11,7 +11,11 @@ import (
 )
 
 // Guarda la imagen en el directorio del usuario y devuelve la ruta relativa para acceder a ella
-func UploadImage(c *fiber.Ctx, userId string, userDir string) (string, error) {
+func UploadImage(c *fiber.Ctx, userId string) (string, error) {
+	_, uploadsDir, err := InitUserDir(userId)
+	if err != nil {
+		return "", err
+	}
 	file, err := c.FormFile("file")
 	if err != nil {
 		log.Println(err)
@@ -19,7 +23,7 @@ func UploadImage(c *fiber.Ctx, userId string, userDir string) (string, error) {
 	}
 	uniqueFilename := strconv.Itoa((rand.Intn(99999) + 10000)) + "_" + file.Filename
 
-	err = c.SaveFile(file, userDir+"/"+uniqueFilename)
+	err = c.SaveFile(file, uploadsDir+"/"+uniqueFilename)
 	if err != nil {
 		log.Println("Error al guardar el archivo: ", err)
 		return "", err
