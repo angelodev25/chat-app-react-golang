@@ -25,7 +25,7 @@ func main() {
 	go usersHub.Listen()
 
 	app.Use(cors.New(cors.Config{
-		AllowOrigins:     "http://10.7.0.38:5174, http://127.0.0.1:5174, http://localhost:5174",
+		AllowOrigins:     "http://10.7.0.38:5174, http://127.0.0.1:5174, http://localhost:5174, https://chat-app-react-golang.vercel.app",
 		AllowMethods:     "GET,POST,PUT,DELETE,OPTIONS",
 		AllowHeaders:     "Origin, Content-Type, Accept, Authorization, Upgrade, Connection",
 		AllowCredentials: true,
