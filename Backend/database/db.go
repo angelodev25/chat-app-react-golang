@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"log"
 
+	"github.com/angedev25/chat-backend/config"
 	_ "github.com/lib/pq"
 	_ "modernc.org/sqlite"
 )
@@ -12,9 +13,7 @@ var DB *sql.DB // Base de datos postgres que guardará usuarios y informacion de
 var err error
 
 func InitDB() {
-	connString := "host=localhost port=5432 user=admin password=D238.f234 dbname=chatapp sslmode=disable"
-
-	DB, err = sql.Open("postgres", connString)
+	DB, err = sql.Open("postgres", config.LoadsConfig().DBConnString)
 	if err != nil {
 		log.Fatal("No se pudo crear la base de datos: ", err)
 	}

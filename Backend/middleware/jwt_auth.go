@@ -2,15 +2,13 @@ package middleware
 
 import (
 	"fmt"
-	"os"
 	"strings"
 	"time"
 
+	"github.com/angedev25/chat-backend/config"
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v5"
 )
-
-var JWTSecret = []byte(os.Getenv("JWT_SECRET"))
 
 func GenerateJWT(userId, email string) (string, error) {
 	claims := jwt.MapClaims{
@@ -20,7 +18,7 @@ func GenerateJWT(userId, email string) (string, error) {
 		"iat":     time.Now().Unix(),                         // tiempo de emision
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return token.SignedString(JWTSecret)
+	return token.SignedString([]byte(config.LoadsConfig().JwtSecret))
 }
 
 func ValidateToken(tokenString string) (*jwt.Token, error) {
@@ -29,7 +27,7 @@ func ValidateToken(tokenString string) (*jwt.Token, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("Token inválido. Método de firma inesperado: %v", token.Header["alg"])
 		}
-		return JWTSecret, nil
+		return []byte(config.LoadsConfig().JwtSecret), nil
 	})
 }
 

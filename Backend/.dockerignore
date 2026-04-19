@@ -1,0 +1,27 @@
+# Binarios locales
+server
+*.exe
+*.test
+
+# Datos
+*.db
+*.sqlite
+data/
+
+# Dependencias
+vendor/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Archivos temporales
+tmp/
