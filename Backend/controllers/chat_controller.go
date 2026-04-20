@@ -9,7 +9,6 @@ import (
 	"github.com/angedev25/chat-backend/database"
 	"github.com/angedev25/chat-backend/models"
 	"github.com/angedev25/chat-backend/services"
-	"github.com/angedev25/chat-backend/utils"
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 )
@@ -108,13 +107,13 @@ func CreateChat(c *fiber.Ctx) error {
 		}
 
 		go func() {
-			dirs := []string{currentUser.Dir, otherUser.Dir}
+			IDs := []string{currentUser.ID, otherUser.ID}
 			messsages := []models.Message{*chatToCurrentUser.LastMessage, *chatToOtherUser.LastMessage}
 
-			for i, dir := range dirs {
-				userDB, err := database.GetMessagesDB(dir)
+			for i, id := range IDs {
+				userDB, err := database.GetMessagesDB(id)
 				if err != nil {
-					log.Printf("Error al abrir base de datos para el usuario con dir %s: %v", dir, err)
+					log.Printf("Error al abrir base de datos para el usuario con id %s: %v", id, err)
 					continue
 				}
 				defer userDB.Close()
@@ -122,10 +121,10 @@ func CreateChat(c *fiber.Ctx) error {
 				query := `INSERT INTO messages (id, chat_id, sender_id, content, timestamp) VALUES ($1, $2, $3, $4, $5)`
 				_, err = userDB.Exec(query, messsages[i].ID, messsages[i].ChatID, messsages[i].SenderID, messsages[i].Content, messsages[i].Timestamp)
 				if err != nil {
-					log.Printf("Error al guardar mensaje del servidor para usuario con dir: %s, error: %v", dir, err)
+					log.Printf("Error al guardar mensaje del servidor para usuario con id: %s, error: %v", id, err)
 					continue
 				}
-				log.Println("Mensje del servidor guardado correctamente para user:  ", dir)
+				log.Println("Mensaje del servidor guardado correctamente para user:  ", id)
 			}
 		}()
 
@@ -172,7 +171,7 @@ func GetUserChats(c *fiber.Ctx) error {
 	}
 	defer rows.Close()
 
-	userDB, err := database.GetMessagesDB(user.Dir)
+	userDB, err := database.GetMessagesDB(user.ID)
 	if err != nil {
 		log.Println("Error al obtener la base de datos de mensajes: ", err)
 		return c.Status(500).JSON(fiber.Map{"error": "Error del servidor"})
@@ -222,12 +221,7 @@ func DeleteChat(c *fiber.Ctx) error {
 	}
 
 	for _, id := range users {
-		userDir, _, err := utils.InitUserDir(id)
-		if err != nil {
-			log.Println("Error obtieniendo directorio: ", err)
-			break
-		}
-		userDB, err := database.GetMessagesDB(userDir)
+		userDB, err := database.GetMessagesDB(id)
 		if err != nil {
 			log.Println("Error abriendo DB: ", err)
 			break

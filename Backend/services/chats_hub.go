@@ -10,7 +10,6 @@ import (
 
 	"github.com/angedev25/chat-backend/database"
 	"github.com/angedev25/chat-backend/middleware"
-	"github.com/angedev25/chat-backend/utils"
 	"github.com/gofiber/websocket/v2"
 )
 
@@ -54,9 +53,10 @@ func (h *ChatsHub) Run() {
 			log.Printf("   Total clientes: %d, En sala %s: %d",
 				len(h.Clients), client.ChatID, len(h.Rooms[client.ChatID]))
 		case client := <-h.Unregister:
-			if _, ok := h.Clients[client.ID]; ok {
+			if client, ok := h.Clients[client.ID]; ok {
 				delete(h.Clients, client.ID)
 				delete(h.Rooms[client.ChatID], client.ID)
+				client.MessagesDB.Close()
 				close(client.Send)
 			}
 		}
@@ -84,8 +84,7 @@ func (h *ChatsHub) Connect(conn *websocket.Conn) {
 		return
 	}
 
-	userDir, _, _ := utils.InitUserDir(userId)
-	userDB, err := database.InitMessagesDB(userDir)
+	userDB, err := database.InitMessagesDB(userId)
 	if err != nil {
 		log.Println("Error al cargar DB de mensajes: ", err)
 		conn.WriteMessage(websocket.CloseMessage, []byte("Error de base de datos"))

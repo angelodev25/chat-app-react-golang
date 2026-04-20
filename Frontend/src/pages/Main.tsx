@@ -81,6 +81,7 @@ export default function Main() {
       if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
         wsRef.current.close(1000, "Component unmounting");
       }
+      setChats([])
     };
   }, [userId, token]);
 

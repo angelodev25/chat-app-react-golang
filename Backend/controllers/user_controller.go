@@ -37,12 +37,11 @@ func CreateUser(c *fiber.Ctx) error {
 
 	// Genera el directorio de archivos del usuario
 	userDir, _, err := utils.InitUserDir(userId)
-
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{"error": "No se pudo crear la carpeta del usuario"})
 	}
 
-	userDB, err := database.InitMessagesDB(userDir)
+	userDB, err := database.InitMessagesDB(userId)
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{"error": "Error creando la base de datos de mensajes"})
 	}
@@ -100,11 +99,17 @@ func CreateUser(c *fiber.Ctx) error {
 // Funcion para el login mediante el token de autenticación, verifica que el token aun sea valido y extrae la informacion del usuario para devolverla en la respuesta, si el token no es valido o ya expiro devuelve error
 func TokenLogin(c *fiber.Ctx) error {
 	email := c.Locals("email").(string)
-
+	userId := c.Locals("userId").(string)
 	user, exists := GetUserByEmail(email)
 	if !exists {
 		return c.Status(404).JSON(fiber.Map{"error": "Usuario no encontrado"})
 	}
+
+	userDB, err := database.InitMessagesDB(userId)
+	if err != nil {
+		log.Println("Error iniciando la base de datos de mensajes: ", err)
+	}
+	defer userDB.Close()
 
 	return c.Status(200).JSON(fiber.Map{"user": user})
 }
@@ -149,6 +154,15 @@ func LoginUser(c *fiber.Ctx) error {
 		log.Println(err)
 		return c.Status(500).JSON(fiber.Map{"error": "No se pudo crear el token de autenticación"})
 	}
+
+	// Inicializa la DB de mensajes del usuario, si hay un error se loguea pero no se devuelve un error porque el login se considera exitoso aunque
+	// no se pueda crear la DB de mensajes, el usuario podria intentar iniciar sesión de nuevo para solucionar el problema o usar la aplicación normalmente
+	// y la DB de mensajes se creará cuando intente enviar un mensaje o crear un chat.
+	userDB, err := database.InitMessagesDB(user.ID)
+	if err != nil {
+		log.Println("Error iniciando la base de datos de mensajes: ", err)
+	}
+	defer userDB.Close()
 
 	// Devuelve todos los datos
 	return c.Status(200).JSON(fiber.Map{"message": "Correcto!", "user": user, "token": token})
@@ -225,14 +239,14 @@ func UpdateUser(c *fiber.Ctx) error {
 			return c.Status(500).JSON(fiber.Map{"error": "Error al verificar el nombre de usuario"})
 		}
 		if usernameExists {
-			return c.Status(400).JSON(fiber.Map{"error": "Ese nombre de usuario no estña diponible"})
+			return c.Status(400).JSON(fiber.Map{"error": "Ese nombre de usuario no está diponible"})
 		}
 
 		query := `UPDATE users SET username = $1 WHERE id = $2`
 		_, err = database.DB.Exec(query, user.Username, userId)
 		if err != nil {
 			log.Println(err)
-			return c.Status(500).JSON(fiber.Map{"error": "No se pudo actualizar el nombre de usuario"})
+			return c.Status(500).JSON(fiber.Map{"error": "No se pudo actualizar el nombre de usuario, intenta más tarde."})
 		}
 		existingUser.Username = user.Username
 	}

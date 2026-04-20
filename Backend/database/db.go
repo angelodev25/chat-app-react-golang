@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/angedev25/chat-backend/config"
+	"github.com/angedev25/chat-backend/utils"
 	_ "github.com/lib/pq"
 	_ "modernc.org/sqlite"
 )
@@ -53,8 +54,12 @@ func InitDB() {
 	log.Println("Base de datos conectada.")
 }
 
-func InitMessagesDB(dir string) (*sql.DB, error) {
-	db, err := sql.Open("sqlite", dir+"/messagesDB.db")
+func InitMessagesDB(userId string) (*sql.DB, error) {
+	userDir, _, err := utils.InitUserDir(userId)
+	if err != nil {
+		log.Println("No se puo crear el directorio del usuario: ", err)
+	}
+	db, err := sql.Open("sqlite", userDir+"/messagesDB.db")
 	if err != nil {
 		log.Println("No se pudo crear la base de datos de mensajes")
 		return nil, err
@@ -80,8 +85,17 @@ func InitMessagesDB(dir string) (*sql.DB, error) {
 	return db, nil
 }
 
-func GetMessagesDB(dir string) (*sql.DB, error) {
-	return sql.Open("sqlite", dir+"/messagesDB.db")
+func GetMessagesDB(userId string) (*sql.DB, error) {
+	userDir, _, err := utils.InitUserDir(userId)
+	if err != nil {
+		log.Println("No se pudo obtener el directorio del usuario: ", err)
+	}
+	db, err := sql.Open("sqlite", userDir+"/messagesDB.db")
+	if err != nil {
+		log.Println("No se pudo abrir la base de datos de mensajes: ", err)
+		return nil, err
+	}
+	return db, nil
 }
 
 // Cierra la conexión a la base de datos postgres

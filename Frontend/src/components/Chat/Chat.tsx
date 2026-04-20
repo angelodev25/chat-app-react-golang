@@ -224,7 +224,7 @@ export default function ChatArea(props: Props) {
 											<p className="py-1 px-3 rounded-[30px] inline-block max-w-[70%] break-word text-gray-400 bg-[#171921]">
 												{msg.content}
 												<br />
-												<span className="text-[10px] flex justify-center text-[#636975]" >{hora}</span>
+												<span className="text-[11px] flex justify-center text-[#777777]" >{hora}</span>
 											</p>
 										</div>
 									)
@@ -237,12 +237,12 @@ export default function ChatArea(props: Props) {
 										onContextMenu={(e) => handleContextMenu(e, msg.id, msg.senderId, msg.content)}
 									>
 										<div className="relative group max-w-[70%]">
-											<p className={`p-3 rounded-[30px] ${msg.senderId === userId ? 'bg-(--own-message) hover:bg-[#232a35bf]' : 'bg-(--other-message) hover:bg-(--other-message-hover)'} 
+											<p className={`px-3 py-2 rounded-[30px] ${msg.senderId === userId ? 'bg-(--own-message) hover:bg-[#232a35bf]' : 'bg-(--other-message) hover:bg-(--other-message-hover)'} 
 												text-white transition-all duration-200 cursor-context-menu
 											`}>
 												{msg.content}
 												<br />
-												<span className="text-[10px] flex justify-end text-[#636975] mt-1">
+												<span className="text-[11px] flex justify-end text-[#777777] mt-1">
 													{hora}
 												</span>
 											</p>

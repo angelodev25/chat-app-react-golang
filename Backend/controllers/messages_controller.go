@@ -5,7 +5,6 @@ import (
 
 	"github.com/angedev25/chat-backend/database"
 	"github.com/angedev25/chat-backend/models"
-	"github.com/angedev25/chat-backend/utils"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -13,13 +12,7 @@ func LoadChatMessages(c *fiber.Ctx) error {
 	chatId := c.Params("chatId")
 	userId := c.Locals("userId").(string)
 
-	userDir, _, err := utils.InitUserDir(userId)
-	if err != nil {
-		log.Println("Error al obtener directorio del usuario: ", err)
-		return c.Status(500).JSON(fiber.Map{"error": "Error del servidor"})
-	}
-
-	userDB, err := database.InitMessagesDB(userDir)
+	userDB, err := database.GetMessagesDB(userId)
 	if err != nil {
 		log.Println("Error al obtener la base de datos de mensajes: ", err)
 		return c.Status(500).JSON(fiber.Map{"error": "Error del servidor"})

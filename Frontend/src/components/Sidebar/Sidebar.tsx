@@ -20,6 +20,7 @@ export function Sidebar({ setCurrent }: { setCurrent: Dispatch<SetStateAction<Ch
 	const { user, logOut } = useAuth()
 	const { getChats } = useChatsActions()
 	const [openCreate, setOpenCreate] = useState(false)
+	const [deleted, setDeleted] = useState(false)
 	const [chatToDelete, setChatToDelete] = useState<string | null>(null)
 
 	const handleOpenChat = (currentChat: Chat) => {
@@ -32,6 +33,13 @@ export function Sidebar({ setCurrent }: { setCurrent: Dispatch<SetStateAction<Ch
 	useEffect(() => {
 		getChats()
 	}, [])
+
+	useEffect(() => {
+		if (deleted) {
+			setCurrent(null)
+			setDeleted(false)
+		}
+	}, [deleted])
 
 	return (
 		<aside className="
@@ -110,7 +118,7 @@ export function Sidebar({ setCurrent }: { setCurrent: Dispatch<SetStateAction<Ch
 									</div>
 									<div className="flex w-80">
 										<div className="flex  justify-between text-zinc-400 p-2">
-											{chat.lastMessage.content.length > 36 ? chat.lastMessage.content.split("\n")[0].substring(0, 33) + "..." : chat.lastMessage.content}
+											{chat.lastMessage.content.length > 40 ? chat.lastMessage.content.split("\n")[0].substring(0, 37) + "..." : chat.lastMessage.content}
 										</div>
 									</div>
 								</div>
@@ -143,7 +151,7 @@ export function Sidebar({ setCurrent }: { setCurrent: Dispatch<SetStateAction<Ch
 											</DropdownMenuItem>
 										</DropdownMenuContent>
 									</DropdownMenu>
-									<ConfirmDeleteChatDialog chatToDelete={chatToDelete} setChatToDelete={setChatToDelete} />
+									<ConfirmDeleteChatDialog chatToDelete={chatToDelete} setChatToDelete={setChatToDelete} setDeleted={setDeleted} />
 								</div>
 							</div>
 						</div>

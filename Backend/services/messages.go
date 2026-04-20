@@ -8,7 +8,6 @@ import (
 
 	"github.com/angedev25/chat-backend/database"
 	"github.com/angedev25/chat-backend/models"
-	"github.com/angedev25/chat-backend/utils"
 	"github.com/gofiber/websocket/v2"
 	"github.com/google/uuid"
 )
@@ -55,17 +54,12 @@ func (h *ChatsHub) SaveMessage(sender *Client, content, targetUser string) {
 		if !isThere {
 			go h.SendMessageToDisconnected(targetUser, message)
 		}
+
 	}
 }
 
 func (h *ChatsHub) SendMessageToDisconnected(userId string, message models.Message) {
-	userDir, _, err := utils.InitUserDir(userId)
-	if err != nil {
-		log.Println("Error al obtener el directorio: ", err)
-		return
-	}
-
-	userDB, err := database.GetMessagesDB(userDir)
+	userDB, err := database.GetMessagesDB(userId)
 	if err != nil {
 		log.Println("Error al abrir base de datos: ", err)
 		return
@@ -97,17 +91,10 @@ func (h *ChatsHub) SendMessageToDisconnected(userId string, message models.Messa
 			return
 		}
 	}
-
 }
 
 func (h *ChatsHub) MarkMessagesAsReaded(userId, chatId string) {
-	userDir, _, err := utils.InitUserDir(userId)
-	if err != nil {
-		log.Println("Error al obtener el directorio: ", err)
-		return
-	}
-
-	userDB, err := database.GetMessagesDB(userDir)
+	userDB, err := database.GetMessagesDB(userId)
 	if err != nil {
 		log.Println("Error al abrir base de datos: ", err)
 		return
@@ -183,13 +170,7 @@ func (h *ChatsHub) DeleteMessageForSingleUser(chatId, messageId string, client *
 }
 
 func (h *ChatsHub) DeleteMessageForDisconnected(chatId, messageId, userId string) {
-	userDir, _, err := utils.InitUserDir(userId)
-	if err != nil {
-		log.Println("Error al obtener el directorio: ", err)
-		return
-	}
-
-	userDB, err := database.GetMessagesDB(userDir)
+	userDB, err := database.GetMessagesDB(userId)
 	if err != nil {
 		log.Println("Error al abrir base de datos: ", err)
 		return
@@ -239,7 +220,5 @@ func (h *ChatsHub) DeleteMessageForDisconnected(chatId, messageId, userId string
 				return
 			}
 		}
-	} else {
-		log.Println("Usuario no en linea")
 	}
 }
