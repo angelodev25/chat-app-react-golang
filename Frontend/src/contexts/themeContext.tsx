@@ -13,7 +13,7 @@ export const CustomThemeProvider: React.FC<{ children: React.ReactNode }> = ({ c
   const [theme, setTheme] = useState<Theme>(() => {
     // Recuperar tema guardado en localStorage
     const saved = localStorage.getItem('app-theme') as Theme;
-    return saved || 'blue'; // tema por defecto
+    return saved || 'cyan'; // tema por defecto
   });
 
   useEffect(() => {
@@ -24,7 +24,6 @@ export const CustomThemeProvider: React.FC<{ children: React.ReactNode }> = ({ c
     html.classList.add(`theme-${theme}`);
     // Guardar en localStorage
     localStorage.setItem('app-theme', theme);
-    console.log("Tema cambió")
   }, [theme]);
 
   return (

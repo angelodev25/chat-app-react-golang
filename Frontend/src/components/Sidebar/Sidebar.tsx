@@ -3,7 +3,7 @@ import { useChatsActions } from "@/hooks/useChatsActions";
 import type { Chat } from "@/types/message";
 import { Button, Divider, IconButton, Tooltip } from "@mui/material";
 import { Asterisk, LogOut, MoreHorizontal, PlusCircle, Trash2 } from "lucide-react";
-import { type Dispatch, type SetStateAction, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from '../ui/dialog'
 import NewChatForm from "../NewChat/NewChatModal";
 import { useAuth } from "@/contexts/authContext";
@@ -15,7 +15,13 @@ import AccountCircle from '@mui/icons-material/AccountCircle';
 
 const API_URL = import.meta.env.VITE_API_URL
 
-export function Sidebar({ setCurrent }: { setCurrent: Dispatch<SetStateAction<Chat | null>> }) {
+interface Props {
+	setCurrent: (chat: Chat|null) => void
+	isMobile: boolean
+}
+
+export function Sidebar(props: Props) {
+	const {setCurrent, isMobile} = props
 	const { chats, setChats } = useChatContext()
 	const { user, logOut } = useAuth()
 	const { getChats } = useChatsActions()
@@ -42,9 +48,9 @@ export function Sidebar({ setCurrent }: { setCurrent: Dispatch<SetStateAction<Ch
 	}, [deleted])
 
 	return (
-		<aside className="
+		<aside className={`
 			fixed right-0 top-0 
-			w-100 h-screen 
+			${isMobile ? "w-screen" : "w-100"} h-screen 
 			bg-gradient-to-b from-(--sidebar-gradient-start) to-(--sidebar-gradient-end)
 			text-white
 			p-4
@@ -52,7 +58,7 @@ export function Sidebar({ setCurrent }: { setCurrent: Dispatch<SetStateAction<Ch
 			overflow-hidden
 			z-50
 			flex flex-col
-		">
+		`}>
 
 			{/* Perfil de usuario */}
 			<div className="flex justify-between items-center top-0 left-0 right-0 p-2 rounded-lg bg-(--sidebar-user-info-background)">
@@ -124,7 +130,7 @@ export function Sidebar({ setCurrent }: { setCurrent: Dispatch<SetStateAction<Ch
 								</div>
 
 								{/* Menu desplegable al hacer hover sobre un chat */}
-								<div className="absolute right-2 top-1/2 transform -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+								<div className="absolute right-2 top-1/2 transform -translate-y-1/2 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity duration-200">
 									<DropdownMenu>
 										<DropdownMenuTrigger asChild>
 											<IconButton

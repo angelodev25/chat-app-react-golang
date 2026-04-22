@@ -1,8 +1,10 @@
 import ChatArea from "@/components/Chat/Chat";
 import { Sidebar } from "@/components/Sidebar";
+import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { useAuth } from "@/contexts/authContext";
 import { useChatContext } from "@/contexts/chatContext";
 import { useUserPreferences } from "@/contexts/userPreferencesContext";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 import type { Chat } from "@/types/message";
 import { useEffect, useRef, useState } from "react";
 import { Navigate } from "react-router-dom";
@@ -14,8 +16,11 @@ export default function Main() {
   const { userId } = useAuth()
   const { chats, setChats } = useChatContext()
   const { image } = useUserPreferences()
+  const [sheetChatOpen, setSheetChatOpen] = useState(false)
+  const isMobile = useMediaQuery("(max-width: 767px)")
   const wsRef = useRef<WebSocket | null>(null)
   const token = localStorage.getItem("token_chat")
+
   if (!userId) return <Navigate to="/login" />
 
   useEffect(() => {
@@ -30,25 +35,22 @@ export default function Main() {
         };
 
         ws.onmessage = (event) => {
-          console.log("Mensaje recibido (raw):", event.data);
-
           try {
             const data = JSON.parse(event.data);
             if (data.code) {
-              switch(data.code) {
+              switch (data.code) {
                 case "delete":
                   setChats((prev) => prev.filter((chat) => chat.id !== data.chat.id));
                   break
                 case "message":
-                  setChats((prev) => prev.map((chat) => 
-                    chat.id === data.message.chatId ? {...chat, lastMessage: data.message} : chat 
+                  setChats((prev) => prev.map((chat) =>
+                    chat.id === data.message.chatId ? { ...chat, lastMessage: data.message } : chat
                   ))
                   break
                 default:
                   console.log("Otro código recibido:", data.code);
               }
             } else {
-              console.log("Agregando nuevo chat:", data.Chat);
               setChats((prev) => [...prev, data.Chat]);
             }
           } catch (parseError) {
@@ -85,6 +87,24 @@ export default function Main() {
     };
   }, [userId, token]);
 
+  useEffect(() => {
+    handleCloseChat()
+  }, [isMobile])
+
+  // Función para cerrar el chat (con retraso para animación)
+  const handleCloseChat = () => {
+    setSheetChatOpen(false)
+    // Programar la limpieza después de que termine la animación (300ms)
+    setTimeout(() => {
+      setCurrentChat(null);
+    }, 500);
+  };
+
+  const handleOpenChat = (chat: Chat|null) => {
+    setCurrentChat(chat)
+    if (isMobile) setSheetChatOpen(true)
+  }
+
   return (
     <div className="relative flex min-h-screen font-sans overflow-hidden"
       style={{
@@ -96,14 +116,48 @@ export default function Main() {
       }}
     >
       <div className="absolute inset-0 bg-black/20"></div>
-      <Sidebar setCurrent={setCurrentChat} />
-      <div className="relative flex-1 p-4 mr-100 overflow-hidden">
-        {currentChat ? <ChatArea chat={currentChat} userId={userId} chats={chats} setChats={setChats} /> : (
-          <div className="rounded-lg p-4 h-full">
-            <p className="flex h-full justify-center items-center bg-(--chat-box-background) rounded-lg text-2xl text-gray-400" >Empieza abriendo un chat</p>
+
+      {isMobile ? (
+        <div>
+          {!currentChat && <Sidebar setCurrent={handleOpenChat} isMobile={isMobile} />}
+          <Sheet 
+            open={sheetChatOpen}
+            onOpenChange={(open) => {
+              if (!open) handleCloseChat();
+            }}
+          >
+            <SheetContent
+              aria-describedby=""
+              side="right"
+              style={{ width: '100%', height: '100vh', background: 'transparent' }}
+              showCloseButton={false}
+              overlayClassName="bg-black/0"
+            >
+              <SheetTitle></SheetTitle>
+              {currentChat &&
+                <ChatArea
+                  chat={currentChat}
+                  userId={userId}
+                  chats={chats}
+                  setChats={setChats}
+                  isMobile={isMobile}
+                  setCurrent={handleCloseChat}
+                />}
+            </SheetContent>
+          </Sheet>
+        </div>
+      ) : (
+        <>
+          <Sidebar setCurrent={handleOpenChat} isMobile={isMobile} />
+          <div className="relative flex-1 p-4 md:mr-100 overflow-hidden">
+            {currentChat ? <ChatArea chat={currentChat} userId={userId} chats={chats} setChats={setChats} isMobile={isMobile} /> : (
+              <div className="rounded-lg p-4 h-full">
+                <p className="flex h-full justify-center items-center bg-(--chat-box-background) rounded-lg text-2xl text-gray-400" >Empieza abriendo un chat</p>
+              </div>
+            )}
           </div>
-        )}
-      </div>
+        </>
+      )}
     </div>
   );
 }

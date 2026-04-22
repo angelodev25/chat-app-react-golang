@@ -1,7 +1,7 @@
 import useMessagesActions from "@/hooks/useMessagesActions"
 import type { Chat } from "@/types/message"
 import { Box, Button, Skeleton, TextField } from "@mui/material"
-import { Copy, Send, Trash2 } from "lucide-react"
+import { ArrowLeft, Copy, Send, Trash2 } from "lucide-react"
 import React, { useEffect, useRef, useState, type Dispatch, type SetStateAction } from "react"
 import { toast } from "sonner"
 import AccountCircle from '@mui/icons-material/AccountCircle';
@@ -13,13 +13,15 @@ type Props = {
 	chat: Chat
 	chats: Chat[]
 	setChats: Dispatch<SetStateAction<Chat[]>>
+	isMobile: boolean
+	setCurrent?: () => void
 }
 
 const API_URL = import.meta.env.VITE_API_URL
 const WS_URL = import.meta.env.VITE_WS_URL
 
 export default function ChatArea(props: Props) {
-	const { chat, userId, setChats } = props
+	const { chat, userId, setChats, isMobile, setCurrent } = props
 	const [message, setMessage] = useState("")
 	const { messages, setMessages, loading } = useMessagesActions(chat.id)
 	const [contextMenu, setContextMenu] = useState<{
@@ -47,7 +49,6 @@ export default function ChatArea(props: Props) {
 		try {
 			const ws = new WebSocket(`${WS_URL}/${chatId}?token=${token}`);
 			ws.onopen = () => {
-				console.log("Websocket conectado.")
 				ws.send(JSON.stringify({ "code": "readed", "content": "", "target": "" }))
 			}
 
@@ -167,25 +168,59 @@ export default function ChatArea(props: Props) {
 
 	const handleContextMenu = (e: React.MouseEvent, messageId: string, sender: string, content: string) => {
 		e.preventDefault()
+		const menuWidth = 160
+		let x = e.clientX
+		let y = e.clientY
+
+		if (sender === userId) {
+			x = e.clientX - menuWidth
+		}
+
+		// Evitar que el menú se salga por la izquierda o derecha
+		const windowWidth = window.innerWidth;
+		if (x < 10) x = 10;
+		if (x + menuWidth > windowWidth - 10) x = windowWidth - menuWidth - 10;
+
+		// Ajuste vertical básico (opcional)
+		const menuHeight = 100; // estimado
+		const windowHeight = window.innerHeight;
+		if (y + menuHeight > windowHeight - 10) y = windowHeight - menuHeight - 10;
+
 		setContextMenu({
 			visible: true,
-			x: e.clientX,
-			y: e.clientY,
+			x,
+			y,
 			messageId,
 			messageSender: sender,
 			content
-		})
-	}
+		});
+	};
+
 
 	return (
 		<div className="w-full bg-(--chat-box-background) rounded-[20px] flex flex-col overflow-hidden h-full"
 			style={{ height: 'calc(100vh - 2rem)' }}>
 			{/* Header */}
-			<div className="flex p-2 mb-3 border-b border-gray-500 flex-shrink-0" >
-				{chat.otherProfileImage ? <img src={`${API_URL}${chat.otherProfileImage}`} className="w-10 h-10 rounded-full" /> : <AccountCircle className="w-10 h-10 rounded-full" />}
-				<h2 className="text-xl font-bold px-5 py-2 flex-shrink-0">
-					{chat.otherUsername}
-				</h2>
+			<div className="flex items-center justify-between p-2 mb-3 border-b border-gray-500 flex-shrink-0">
+				<div className="flex items-center">
+					{chat.otherProfileImage ? (
+						<img src={`${API_URL}${chat.otherProfileImage}`} className="w-10 h-10 rounded-full" />
+					) : (
+						<AccountCircle className="w-10 h-10 rounded-full" />
+					)}
+					<h2 className="text-xl font-bold px-5 py-2">
+						{chat.otherUsername}
+					</h2>
+				</div>
+
+				{isMobile && setCurrent && (
+					<div
+						className="w-9 h-9 flex justify-center items-center hover:bg-gray-400/30 rounded-full cursor-pointer"
+						onClick={() => setCurrent()}
+					>
+						<ArrowLeft className="w-7 h-7 text-gray-300" />
+					</div>
+				)}
 			</div>
 
 			{/* Área de mensajes */}
@@ -221,7 +256,7 @@ export default function ChatArea(props: Props) {
 								if (msg.senderId === "server") {
 									return (
 										<div key={msg.id} className="flex w-full justify-center my-2">
-											<p className="py-1 px-3 rounded-[30px] inline-block max-w-[70%] break-word text-gray-400 bg-[#171921]">
+											<p className="py-2 px-3 leading-[1.2] whitespace-pre-wrap rounded-[30px] inline-block max-w-[70%] break-word text-gray-400 text-center bg-[#171921]">
 												{msg.content}
 												<br />
 												<span className="text-[11px] flex justify-center text-[#777777]" >{hora}</span>
@@ -237,7 +272,7 @@ export default function ChatArea(props: Props) {
 										onContextMenu={(e) => handleContextMenu(e, msg.id, msg.senderId, msg.content)}
 									>
 										<div className="relative group max-w-[70%]">
-											<p className={`px-3 py-2 rounded-[30px] ${msg.senderId === userId ? 'bg-(--own-message) hover:bg-[#232a35bf]' : 'bg-(--other-message) hover:bg-(--other-message-hover)'} 
+											<p className={`px-3 py-2 leading-[1.2] whitespace-pre-wrap rounded-[30px] ${msg.senderId === userId ? 'bg-(--own-message) hover:bg-[#232a35bf]' : 'bg-(--other-message) hover:bg-(--other-message-hover)'} 
 												text-white transition-all duration-200 cursor-context-menu
 											`}>
 												{msg.content}
@@ -335,8 +370,6 @@ export default function ChatArea(props: Props) {
 						<Trash2 className="h-4 w-4" />
 						Eliminar mensaje
 					</button>
-
-
 				</div>
 			)}
 			<Dialog open={openDelete} onOpenChange={setOpenDelete} >
