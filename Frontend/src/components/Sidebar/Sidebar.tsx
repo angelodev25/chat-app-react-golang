@@ -50,13 +50,13 @@ export function Sidebar(props: Props) {
 	return (
 		<aside className={`
 			fixed right-0 top-0 
-			${isMobile ? "w-screen" : "w-100"} h-screen 
+			${isMobile ? "w-screen px-4" : "w-100"} h-dvh 
 			bg-gradient-to-b from-(--sidebar-gradient-start) to-(--sidebar-gradient-end)
 			text-white
 			p-4
 			shadow-xl
 			overflow-hidden
-			z-50
+			z-50 pt-safe pb-safe
 			flex flex-col
 		`}>
 

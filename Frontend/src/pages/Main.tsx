@@ -91,22 +91,20 @@ export default function Main() {
     handleCloseChat()
   }, [isMobile])
 
-  // Función para cerrar el chat (con retraso para animación)
   const handleCloseChat = () => {
     setSheetChatOpen(false)
-    // Programar la limpieza después de que termine la animación (300ms)
     setTimeout(() => {
       setCurrentChat(null);
     }, 500);
   };
 
-  const handleOpenChat = (chat: Chat|null) => {
+  const handleOpenChat = (chat: Chat | null) => {
     setCurrentChat(chat)
     if (isMobile) setSheetChatOpen(true)
   }
 
   return (
-    <div className="relative flex min-h-screen font-sans overflow-hidden"
+    <div className="relative flex min-h-dvh font-sans overflow-hidden"
       style={{
         backgroundImage: `url('/backgrounds/${image}')`,
         backgroundSize: '100% 100%',
@@ -120,7 +118,7 @@ export default function Main() {
       {isMobile ? (
         <div>
           {!currentChat && <Sidebar setCurrent={handleOpenChat} isMobile={isMobile} />}
-          <Sheet 
+          <Sheet
             open={sheetChatOpen}
             onOpenChange={(open) => {
               if (!open) handleCloseChat();
@@ -129,7 +127,7 @@ export default function Main() {
             <SheetContent
               aria-describedby=""
               side="right"
-              style={{ width: '100%', height: '100vh', background: 'transparent' }}
+              style={{ width: '100%', height: '100dvh', maxHeight: '100dvh', background: 'transparent' }}
               showCloseButton={false}
               overlayClassName="bg-black/0"
             >

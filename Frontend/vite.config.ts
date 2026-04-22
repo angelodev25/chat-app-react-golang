@@ -9,9 +9,9 @@ export default defineConfig({
     react(),
     tailwindcss(),
     ViteImageOptimizer({
-      png: { quality: 80 },   // Calidad para PNG
-      jpeg: { quality: 75 },  // Calidad para JPEG
-      webp: { quality: 80 },  // Calidad para WebP
+      png: { quality: 70 },   // Calidad para PNG
+      jpeg: { quality: 70 },  // Calidad para JPEG
+      webp: { quality: 70 },  // Calidad para WebP
     }),
   ],
   server: {
