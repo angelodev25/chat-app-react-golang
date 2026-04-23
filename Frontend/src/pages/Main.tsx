@@ -88,6 +88,18 @@ export default function Main() {
   }, [userId, token]);
 
   useEffect(() => {
+    const handlePopState = () => {
+      if (sheetChatOpen) {
+        window.history.pushState({chatOpen: true}, '', '')
+        handleCloseChat()
+      }
+    }
+
+    window.addEventListener('popstate', handlePopState)
+    return () => window.removeEventListener('popstate', handlePopState)
+  }, [sheetChatOpen])
+
+  useEffect(() => {
     handleCloseChat()
   }, [isMobile])
 
@@ -96,15 +108,21 @@ export default function Main() {
     setTimeout(() => {
       setCurrentChat(null);
     }, 500);
+    window.history.replaceState({chatOpen: false}, '', '')
   };
 
   const handleOpenChat = (chat: Chat | null) => {
     setCurrentChat(chat)
-    if (isMobile) setSheetChatOpen(true)
+    if (isMobile) {
+      setSheetChatOpen(true)
+      if (!sheetChatOpen) {
+        window.history.pushState({chatOpen: true}, '', '')
+      }
+    }
   }
 
   return (
-    <div className="relative flex min-h-dvh font-sans overflow-hidden"
+    <div className="relative flex h-dvh font-sans overflow-hidden"
       style={{
         backgroundImage: `url('/backgrounds/${image}')`,
         backgroundSize: '100% 100%',
@@ -127,11 +145,12 @@ export default function Main() {
             <SheetContent
               aria-describedby=""
               side="right"
+              className="p-2 gap-0 w-full sm:max-w-full"
               style={{ width: '100%', height: '100dvh', maxHeight: '100dvh', background: 'transparent' }}
               showCloseButton={false}
               overlayClassName="bg-black/0"
             >
-              <SheetTitle></SheetTitle>
+              <SheetTitle className="hidden"/>
               {currentChat &&
                 <ChatArea
                   chat={currentChat}

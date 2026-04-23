@@ -198,8 +198,9 @@ export default function ChatArea(props: Props) {
 
 
 	return (
-		<div className="w-full bg-(--chat-box-background) rounded-[20px] flex flex-col overflow-hidden h-full"
-			style={{ height: 'calc(100dvh - 2rem)' }}>
+		<div className="w-full bg-(--chat-box-background) rounded-[20px] flex flex-1 flex-col overflow-hidden"
+			style={{ height: `calc(100dvh - 2rem)` }}
+			>
 			{/* Header */}
 			<div className="flex items-center justify-between p-2 mb-3 border-b border-gray-500 flex-shrink-0">
 				<div className="flex items-center">
