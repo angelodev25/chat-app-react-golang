@@ -50,9 +50,10 @@ export function Sidebar(props: Props) {
 	return (
 		<aside className={`
 			fixed right-0 top-0 
-			${isMobile ? "w-screen px-4" : "w-100 px-4"} h-full
+			${isMobile ? "w-screen px-4" : "w-100"} h-dvh 
 			bg-gradient-to-b from-(--sidebar-gradient-start) to-(--sidebar-gradient-end)
 			text-white
+			p-4
 			shadow-xl
 			overflow-hidden
 			z-50 pt-safe pb-safe
@@ -60,7 +61,7 @@ export function Sidebar(props: Props) {
 		`}>
 
 			{/* Perfil de usuario */}
-			<div className="flex justify-between items-center top-0 left-0 right-0 p-2 mt-2 rounded-lg bg-(--sidebar-user-info-background)">
+			<div className="flex justify-between items-center top-0 left-0 right-0 p-2 rounded-lg bg-(--sidebar-user-info-background)">
 				<div className="flex items-center space-x-3">
 					<Sheet>
 						<SheetTrigger>
@@ -110,7 +111,7 @@ export function Sidebar(props: Props) {
 				{/* Chats */}
 				{chats.length !== 0 && chats.map((chat) => {
 					return (
-						<div key={chat.id} className="grid gap-y-5 ">
+						<div key={chat.id} className="grid gap-y-5 p-1">
 							<div className="group relative bg-(--sidebar-chat-background) rounded-lg gap-y-2 p-3 max-h-[80px] hover:bg-(--sidebar-chat-background)/50 transition-all animation-all cursor-pointer">
 								<div onClick={() => handleOpenChat(chat)}>
 									<div className="flex gap-x-4 items-center">
@@ -121,7 +122,7 @@ export function Sidebar(props: Props) {
 											</div>
 										}
 									</div>
-									<div className="flex">
+									<div className="flex w-80">
 										<div className="flex  justify-between text-zinc-400 p-2">
 											{chat.lastMessage.content.length > 40 ? chat.lastMessage.content.split("\n")[0].substring(0, 37) + "..." : chat.lastMessage.content}
 										</div>
