@@ -1,45 +1,29 @@
 import useMessagesActions from "@/hooks/useMessagesActions"
-import type { Chat } from "@/types/message"
 import { Box, Button, Skeleton, TextField } from "@mui/material"
-import { ArrowLeft, Copy, Send, Trash2 } from "lucide-react"
-import React, { useEffect, useRef, useState, type Dispatch, type SetStateAction } from "react"
+import { ArrowLeft, Send } from "lucide-react"
+import React, { useEffect, useRef, useState } from "react"
 import { toast } from "sonner"
 import AccountCircle from '@mui/icons-material/AccountCircle';
-import { useCopyToClipboard } from "@/hooks/useCopyToClipboard"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog"
-
-type Props = {
-	userId: string
-	chat: Chat
-	chats: Chat[]
-	setChats: Dispatch<SetStateAction<Chat[]>>
-	isMobile: boolean
-	setCurrent?: () => void
-}
+import type { ChatProps, ContextMenu } from "./types"
+import useCustomContesxtMenu from "./CustomContextMenu/CustomContextMenu"
 
 const API_URL = import.meta.env.VITE_API_URL
 const WS_URL = import.meta.env.VITE_WS_URL
 
-export default function ChatArea(props: Props) {
+export default function ChatArea(props: ChatProps) {
 	const { chat, userId, setChats, isMobile, setCurrent } = props
-	const [message, setMessage] = useState("")
 	const { messages, setMessages, loading } = useMessagesActions(chat.id)
-	const [contextMenu, setContextMenu] = useState<{
-		visible: boolean
-		x: number
-		y: number
-		messageId: string
-		messageSender: string
-		content: string
-	} | null>(null)
+	const [contextMenu, setContextMenu] = useState<ContextMenu | null>(null)
+	const { CustomContextMenu, handleContextMenu } = useCustomContesxtMenu(contextMenu, setContextMenu)
+	const [message, setMessage] = useState("")
 	const [openDelete, setOpenDelete] = useState(false)
-	const messagesEndRef = useRef<HTMLDivElement>(null);
-	const { copyToClipboard } = useCopyToClipboard()
-	const token = localStorage.getItem("token_chat")
-	const wsRef = useRef<WebSocket | null>(null);
 	const [messageId, setMessageId] = useState<string | null>(null)
 	const [messageSender, setMessageSender] = useState<string | null>(null)
 	const chatId = chat.id
+	const messagesEndRef = useRef<HTMLDivElement>(null);
+	const token = localStorage.getItem("token_chat")
+	const wsRef = useRef<WebSocket | null>(null);
 
 	const scrollToBottom = () => {
 		messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -101,27 +85,6 @@ export default function ChatArea(props: Props) {
 		})
 	}
 
-	// Cerrar menú contextual al hacer click fuera
-	useEffect(() => {
-		const handleClickOutside = () => {
-			setContextMenu(null)
-		}
-
-		const handleScroll = () => {
-			setContextMenu(null)
-		}
-
-		if (contextMenu?.visible) {
-			document.addEventListener('click', handleClickOutside)
-			document.addEventListener('scroll', handleScroll, true)
-		}
-
-		return () => {
-			document.removeEventListener('click', handleClickOutside)
-			document.removeEventListener('scroll', handleScroll, true)
-		}
-	}, [contextMenu?.visible])
-
 	useEffect(() => {
 		scrollToBottom();
 	}, [messages]);
@@ -161,46 +124,10 @@ export default function ChatArea(props: Props) {
 		}
 	}
 
-	const handleCopyMessage = (content: string) => {
-		copyToClipboard(content)
-		setContextMenu(null)
-	}
-
-	const handleContextMenu = (e: React.MouseEvent, messageId: string, sender: string, content: string) => {
-		e.preventDefault()
-		const menuWidth = 160
-		let x = e.clientX
-		let y = e.clientY
-
-		if (sender === userId) {
-			x = e.clientX - menuWidth
-		}
-
-		// Evitar que el menú se salga por la izquierda o derecha
-		const windowWidth = window.innerWidth;
-		if (x < 10) x = 10;
-		if (x + menuWidth > windowWidth - 10) x = windowWidth - menuWidth - 10;
-
-		// Ajuste vertical básico (opcional)
-		const menuHeight = 100; // estimado
-		const windowHeight = window.innerHeight;
-		if (y + menuHeight > windowHeight - 10) y = windowHeight - menuHeight - 10;
-
-		setContextMenu({
-			visible: true,
-			x,
-			y,
-			messageId,
-			messageSender: sender,
-			content
-		});
-	};
-
-
 	return (
 		<div className="w-full bg-(--chat-box-background) rounded-[20px] flex flex-1 flex-col overflow-hidden"
 			style={{ height: `calc(100dvh - 2rem)` }}
-			>
+		>
 			{/* Header */}
 			<div className="flex items-center justify-between p-2 mb-3 border-b border-gray-500 flex-shrink-0">
 				<div className="flex items-center">
@@ -342,37 +269,8 @@ export default function ChatArea(props: Props) {
 			</div>
 
 			{/* Menú contextual personalizado */}
-			{contextMenu?.visible && (
-				<div
-					className="fixed z-50 bg-gray-800 rounded-lg shadow-xl border border-gray-700 py-1 min-w-[160px]"
-					style={{
-						top: contextMenu.y,
-						left: contextMenu.x,
-						transform: 'translate(0, 0)'
-					}}
-				>
-					<button
-						className="w-full px-4 py-2 text-left text-sm hover:bg-gray-700 text-gray-200 flex items-center gap-2 transition-colors"
-						onClick={() => handleCopyMessage(contextMenu.content)}
-					>
-						<Copy className="h-4 w-4" />
-						<span>Copiar texto</span>
-					</button>
+			<CustomContextMenu setOpenDelete={setOpenDelete} setMessageId={setMessageId} setMessageSender={setMessageSender} />
 
-					<button
-						className="w-full px-4 py-2 text-left text-sm hover:bg-gray-700 text-red-400 flex items-center gap-2 transition-colors"
-						onClick={() => {
-							setMessageId(contextMenu.messageId)
-							setMessageSender(contextMenu.messageSender)
-							setContextMenu(null)
-							setOpenDelete(true)
-						}}
-					>
-						<Trash2 className="h-4 w-4" />
-						Eliminar mensaje
-					</button>
-				</div>
-			)}
 			<Dialog open={openDelete} onOpenChange={setOpenDelete} >
 				<DialogContent aria-describedby="">
 					<DialogHeader>

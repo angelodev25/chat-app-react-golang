@@ -145,7 +145,7 @@ export default function Main() {
             <SheetContent
               aria-describedby=""
               side="right"
-              className="p-2 gap-0 w-full sm:max-w-full"
+              className="p-2 gap-0 w-full sm:max-w-full border-0"
               style={{ width: '100%', height: '100dvh', maxHeight: '100dvh', background: 'transparent' }}
               showCloseButton={false}
               overlayClassName="bg-black/0"

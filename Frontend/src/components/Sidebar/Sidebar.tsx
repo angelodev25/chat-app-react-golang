@@ -1,31 +1,23 @@
 import { useChatContext } from "@/contexts/chatContext";
 import { useChatsActions } from "@/hooks/useChatsActions";
 import type { Chat } from "@/types/message";
-import { Button, Divider, IconButton, Tooltip } from "@mui/material";
-import { Asterisk, LogOut, MoreHorizontal, PlusCircle, Trash2 } from "lucide-react";
+import { Divider, IconButton } from "@mui/material";
+import { Asterisk, MoreHorizontal, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from '../ui/dialog'
-import NewChatForm from "../NewChat/NewChatModal";
-import { useAuth } from "@/contexts/authContext";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../ui/dropdown-menu";
 import ConfirmDeleteChatDialog from "./ConfirmDeleteChat";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "../ui/sheet";
-import ProfileSettings from "../ProfileSettings/ProfileSettings";
-import AccountCircle from '@mui/icons-material/AccountCircle';
-
-const API_URL = import.meta.env.VITE_API_URL
+import SidebarHeader from "./SidebarHeader/SidebarHeader";
+import NewChatButton from "../NewChat/NewChatButton";
 
 interface Props {
-	setCurrent: (chat: Chat|null) => void
+	setCurrent: (chat: Chat | null) => void
 	isMobile: boolean
 }
 
 export function Sidebar(props: Props) {
-	const {setCurrent, isMobile} = props
+	const { setCurrent, isMobile } = props
 	const { chats, setChats } = useChatContext()
-	const { user, logOut } = useAuth()
 	const { getChats } = useChatsActions()
-	const [openCreate, setOpenCreate] = useState(false)
 	const [deleted, setDeleted] = useState(false)
 	const [chatToDelete, setChatToDelete] = useState<string | null>(null)
 
@@ -60,38 +52,7 @@ export function Sidebar(props: Props) {
 		`}>
 
 			{/* Perfil de usuario */}
-			<div className="flex justify-between items-center top-0 left-0 right-0 p-2 mt-2 rounded-lg bg-(--sidebar-user-info-background)">
-				<div className="flex items-center space-x-3">
-					<Sheet>
-						<SheetTrigger>
-							<div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center cursor-pointer">
-								{user?.profileImage ? <img src={`${API_URL}${user?.profileImage}`} className="w-10 h-10 rounded-full" /> : <AccountCircle className="w-10 h-10 rounded-full" />}
-							</div>
-						</SheetTrigger>
-						<SheetContent
-							aria-describedby=""
-							style={{ 
-								width: '500px', 
-								maxWidth: '90vw', 
-								background: 'linear-gradient(to bottom, var(--profile-settings-gradient-start) 0%, var(--profile-settings-gradient-middle) 50%, var(--profile-settings-gradient-end) 100%)' 
-							}}
-							side="left"
-						>
-							<SheetHeader>
-								<SheetTitle className="text-2xl" >Tu perfil</SheetTitle>
-							</SheetHeader>
-							<ProfileSettings />
-						</SheetContent>
-					</Sheet>
-					<div>
-						<p className="font-medium">{user?.profileName}</p>
-						<p className="text-sm text-purple-200">{user?.username}</p>
-					</div>
-				</div>
-				<div className="flex justify-end">
-					<Button variant="text" startIcon={<LogOut />} onClick={logOut} >Salir</Button>
-				</div>
-			</div>
+			<SidebarHeader />
 
 			{/* Título del sidebar */}
 			<div className="mb-5 mt-5">
@@ -109,8 +70,9 @@ export function Sidebar(props: Props) {
 
 				{/* Chats */}
 				{chats.length !== 0 && chats.map((chat) => {
+					const maxMessageLength = isMobile ? 30 : 40
 					return (
-						<div key={chat.id} className="grid gap-y-5 ">
+						<div key={chat.id} className="grid my-1">
 							<div className="group relative bg-(--sidebar-chat-background) rounded-lg gap-y-2 p-3 max-h-[80px] hover:bg-(--sidebar-chat-background)/50 transition-all animation-all cursor-pointer">
 								<div onClick={() => handleOpenChat(chat)}>
 									<div className="flex gap-x-4 items-center">
@@ -123,7 +85,7 @@ export function Sidebar(props: Props) {
 									</div>
 									<div className="flex">
 										<div className="flex  justify-between text-zinc-400 p-2">
-											{chat.lastMessage.content.length > 40 ? chat.lastMessage.content.split("\n")[0].substring(0, 37) + "..." : chat.lastMessage.content}
+											{chat.lastMessage.content.length > maxMessageLength ? chat.lastMessage.content.split("\n")[0].substring(0, maxMessageLength - 3) + "..." : chat.lastMessage.content}
 										</div>
 									</div>
 								</div>
@@ -144,7 +106,7 @@ export function Sidebar(props: Props) {
 												<MoreHorizontal className="h-4 w-4" />
 											</IconButton>
 										</DropdownMenuTrigger>
-										<DropdownMenuContent>
+										<DropdownMenuContent side="left">
 											<DropdownMenuItem onSelect={(e) => {
 												e.preventDefault()
 												setChatToDelete(chat.id)
@@ -165,22 +127,7 @@ export function Sidebar(props: Props) {
 			</div>
 
 			{/* Boton para crear nuevo chat */}
-			<div className="w-full flex justify-end items-center">
-				<Dialog open={openCreate} onOpenChange={setOpenCreate} >
-					<DialogTrigger asChild>
-						<Tooltip title="Comenzar nuevo chat" placement="left">
-							<IconButton aria-label="Add new chat" size="large" color="primary" >
-								<PlusCircle className="" />
-							</IconButton>
-						</Tooltip>
-					</DialogTrigger>
-					<DialogContent aria-describedby="">
-						<DialogTitle>Busca a alguien para chatear</DialogTitle>
-						<DialogDescription>Busca a alguien por su...</DialogDescription>
-						<NewChatForm setOpen={setOpenCreate} />
-					</DialogContent>
-				</Dialog>
-			</div>
+			<NewChatButton />
 		</aside>
 	);
 }
